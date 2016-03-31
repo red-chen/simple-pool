@@ -1,0 +1,13 @@
+# -*- mode: python -*-
+# -*- coding: utf-8 -*-
+
+Import('env')
+
+obj = [
+    'cJSON.c'
+]
+
+env.aStaticLibrary("cjson_static", obj) 
+env.aSharedLibrary("cjson_shared", obj) 
+
+env.aProgram('cjson_test', ['test.c'], LIBS=['cjson_static', 'm'])

@@ -1,0 +1,19 @@
+# -*- mode: python -*-
+# -*- coding: utf-8 -*-
+
+Import('env')
+
+# 添加依赖的库的头文件
+env.Append(CPPPATH='#/include/simple/')
+
+# 添加依赖的库的路径
+env.Append(LIBPATH='#/lib/')
+
+lib = [
+    'simple_static'
+]
+
+env.aProgram(
+    "timestamp_unittest", 
+    ['timestamp_unittest.c'], 
+    LIBS=lib)
