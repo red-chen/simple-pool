@@ -8,7 +8,4 @@ typedef struct simple_address_t {
     char path[108]; // define from unix struct sockaddr_un
 } SimpleAddress;
 
-
-
-
 #endif

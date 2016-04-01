@@ -1,5 +1,5 @@
 /**
- * TcpServer是Tcp服务器的封装
+ * Server是服务器的封装
  *
  * 工作流程：
  * 1. Server创建一个Acceptor，用于监听端口或者路径，并将NewConnection回调绑定到Acceptor上面
@@ -14,18 +14,18 @@
  * 在Connection内部，一次完整的请求和响应我们抽象为Session
  */
 
-#ifndef SIMPLE_TCP_SERVER_H
-#define SIMPLE_TCP_SERVER_H
+#ifndef SIMPLE_SERVER_H
+#define SIMPLE_SERVER_H
 
 #include "../io/io_handler.h"
 
-// Tcp Server 相关的配置
-typedef struct simple_tcp_server_config_t {
+//  Server 相关的配置
+typedef struct simple_server_config_t {
     int io_thread_count;
     // TODO 添加更多的选项，比如连接复用，超时等
-} SimpleTcpServerConfig;
+} SimpleServerConfig;
 
-typedef struct simpel_tcp_server_t SimpleTcpServer;
+typedef struct simpel_server_t SimpleServer;
 
 /**
  * 创建服务器
@@ -36,16 +36,21 @@ typedef struct simpel_tcp_server_t SimpleTcpServer;
  *     config 服务器启动的相关配置，可以传入NULL
  */
 // TODO 这里port可以抽象为一个Address的对象，Address对象接收端口或者domain socket的路径
-SimpleTcpServer* simple_tcp_server_create(int port, SimpleIOHandler* handler, SimpleTcpServerConfig* config);
+SimpleServer* simple_server_create(int port, SimpleIOHandler* handler, SimpleServerConfig* config);
+
+/**
+ * 销毁服务器
+ */
+void simple_server_destroy(SimpleServer* self);
 
 /**
  * 启动服务器
  */
-void simple_tcp_server_start(SimpleTcpServer* self);
+void simple_server_start(SimpleServer* self);
 
 /**
  * 关闭服务器
  */
-void simple_tcp_server_shutdown(SimpleTcpServer* self);
+void simple_server_stop(SimpleServer* self);
 
 #endif

@@ -1,5 +1,5 @@
 
-#include "net/tcp_acceptor.h"
+#include "net/acceptor.h"
 
 #include "io/io_thread.h"
 
@@ -17,7 +17,7 @@
 
 #define MAX_LISTENFD 1024
 
-struct simple_tcp_acceptor_t {
+struct simple_acceptor_t {
     int port;
     int listen_fd;
     NewConnectionCB* new_conn;
@@ -26,37 +26,41 @@ struct simple_tcp_acceptor_t {
 
 // 监听端口可读事件回调
 // 这个函数内部会调用TcpServer的NewConnection函数
-static void simple_tcp_acceptor_handle_read(EventLoop* loop, int sock, void* user_data, int mask);
+static void simple_acceptor_handle_read(EventLoop* loop, int sock, void* user_data, int mask);
 
-static void simpel_tcp_acceptor_bind_and_listen(SimpleTcpAcceptor* self);
+static void simpel_acceptor_bind_and_listen(SimpleAcceptor* self);
 
-SimpleTcpAcceptor* simple_tcp_acceptor_create(int port, NewConnectionCB* new_conn) {
-    SimpleTcpAcceptor* self = malloc(sizeof(SimpleTcpAcceptor));
+SimpleAcceptor* simple_acceptor_create(int port, NewConnectionCB* new_conn) {
+    SimpleAcceptor* self = malloc(sizeof(SimpleAcceptor));
     self->port = port;
     self->new_conn = new_conn;
     self->thread = simple_io_thread_create();
     return self;
 }
 
-void simple_tcp_acceptor_start(SimpleTcpAcceptor* self) {
-    simpel_tcp_acceptor_bind_and_listen(self);
+void simple_acceptor_destroy(SimpleAcceptor* self) {
+    // TODO
+}
+
+void simple_acceptor_start(SimpleAcceptor* self) {
+    simpel_acceptor_bind_and_listen(self);
 
     simple_io_thread_add_file_event(
         self->thread,
         self->listen_fd,
         AE_READABLE,
-        simple_tcp_acceptor_handle_read,
+        simple_acceptor_handle_read,
         self
     );
 
     simple_io_thread_start(self->thread);
 }
 
-void simple_tcp_acceptor_stop(SimpleTcpAcceptor* self) {
+void simple_acceptor_stop(SimpleAcceptor* self) {
     // TODO
 }
 
-void simpel_tcp_acceptor_bind_and_listen(SimpleTcpAcceptor* self) {
+void simpel_acceptor_bind_and_listen(SimpleAcceptor* self) {
     bool on = true;
     self->listen_fd = socket(AF_INET, SOCK_STREAM, 0);
     fcntl(self->listen_fd, F_SETFL, O_NONBLOCK); //no-block IO
@@ -78,8 +82,8 @@ void simpel_tcp_acceptor_bind_and_listen(SimpleTcpAcceptor* self) {
     }
 }
 
-void simple_tcp_acceptor_handle_read(EventLoop* loop, int sock, void* user_data, int mask) {
-    SimpleTcpAcceptor* self = (SimpleTcpAcceptor*) user_data;
+void simple_acceptor_handle_read(EventLoop* loop, int sock, void* user_data, int mask) {
+    SimpleAcceptor* self = (SimpleAcceptor*) user_data;
     struct sockaddr_in client_addr;
     socklen_t sockaddr_len = sizeof(struct sockaddr_in);
 
