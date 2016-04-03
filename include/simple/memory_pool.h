@@ -8,6 +8,8 @@
  *
  * 数据申请内存由两部分组成，header和body，header主要存储是内存所在的
  * 位置，长度等，body主要用户用户数据存储
+ *
+ * 用户获取body的指针地址
  */
 #ifndef SIMPLE_MEMORY_POOL_H
 #define SIMPLE_MEMORY_POOL_H
@@ -18,13 +20,17 @@ typedef struct memory_pool_t MemoryPool;
 MemoryPool* simple_memory_pool_create(uint32_t size);
 
 // 从内存池中申请内存 
-void* simple_memory_pool_malloc(MemoryPool* self, size_t size);
+// desc : 描述内存的用途，方便调试
+void* simple_memory_pool_malloc(MemoryPool* self, size_t size, char* desc);
 
 // 将申请的内存释放
 void simple_memory_pool_free(MemoryPool* self, void* ptr);
 
 // 清空内存池中的数据
-void simple_memory_pool_clear(MemoryPool* self)
+void simple_memory_pool_clear(MemoryPool* self);
+
+// 内存指针引用拷贝，注意：传入的指针只能来自于pool中申请的内存
+void* simple_memory_ref(void* ptr);
 
 // 销毁内存池对象
 void simple_memory_pool_destroy(MemoryPool* self);

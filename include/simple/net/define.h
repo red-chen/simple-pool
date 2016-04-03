@@ -24,7 +24,7 @@ typedef int SimpleIdleConn(SimpleConnection* c);
 /**
  * 数据编码函数
  *
- * 将用户数据编码到发送的Buffer中
+ * 将用户数据打包到发送的Buffer中
  */
 typedef int SimpleEncode(SimpleRequest* r, void* data);
 
@@ -33,6 +33,8 @@ typedef int SimpleEncode(SimpleRequest* r, void* data);
  *
  * 该函数的主要目的是读取SimpleMessage中的数据，尝试构造为一个
  * 完整的数据包，并将数据包返回给系统。
+ *
+ * 调用位置：connection的read事件函数中
  */
 typedef void* SimpleDecode(SimpleMessage* m);
 typedef int SimpleProcess(SimpleRequest* r);

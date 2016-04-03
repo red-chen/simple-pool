@@ -12,13 +12,22 @@ struct simple_connection_t {
 struct simple_session_t {
 };
 
-// 处理读事件
-static int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask);
+static int simple_connection_read(
+        EventLoop* loop, 
+        int fd, 
+        void* user_data, 
+        int mask);
 
-// 处理写事件
-static int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask);
+static int simple_connection_write(
+        EventLoop* loop, 
+        int fd, 
+        void* user_data, 
+        int mask);
 
-SimpleConnection* simple_connection_create(SimpleIOThread* thread, int sock, SimpleHandler* handler) {
+SimpleConnection* simple_connection_create(
+        SimpleIOThread* thread, 
+        int sock, 
+        SimpleHandler* handler) {
     SimpleConnection* self = malloc(sizeof(SimpleConnection));
     self->sock = sock;
     self->thread = thread;
@@ -27,7 +36,7 @@ SimpleConnection* simple_connection_create(SimpleIOThread* thread, int sock, Sim
 }
 
 void simple_connection_establish(SimpleConnection* self) {
-    if (self->handler->connect != NULL) {
+    if (self->handler->new_conn != NULL) {
         self->handler->new_conn(self);
     }
 
@@ -41,7 +50,14 @@ void simple_connection_establish(SimpleConnection* self) {
     );
 }
 
+int simple_connection_send(SimpleConnection* self, SimpleRequest* r) {
+    // encode
+}
+
 void simple_connection_close(SimpleConnection* self) {
+    if (self->handler->dis_conn != NULL) {
+        self->handler->dis_conn(self);
+    }
     // TODO
 }
 
@@ -58,26 +74,19 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     // 的内容
     
     // NOTE 为什么每次只调用一次read呢？
-    // 因为我们的Buffer接收大小默认开启为16KB，单次足够满足打数的请求需要，为了
+    // 因为我们的Buffer接收大小默认开启为16KB，单次足够满足大多数的请求需要，为了
     // 不让某个大请求持续的占用线程，所以不能持续读取数据
-    // TODO Buffer大小可以动态设置
-    
-
+    // TODO Buffer大小可以动态设置, 考虑Buffer动态在堆上分配或者编译决定大小
+   
     return AE_NOMORE;
-}
-
-
-void* on_message(Buffer) {
-    if (buffer_size >= require_size) {
-        // 
-        return process(data);
-    } else {
-        return NULL;
-    }
 }
 
 int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) {
     SimpleConnection* self = (SimpleConnection*) user_data;
 
+    // 读取发送队列中的数据，将数据发送出去，同理，也只调用一次write
+
     return AE_NOMORE;
 }
+
+
