@@ -1,4 +1,3 @@
-
 #include "net/acceptor.h"
 
 #include "io/io_thread.h"
@@ -20,21 +19,22 @@
 struct simple_acceptor_t {
     int port;
     int listen_fd;
-    NewConnectionCB* new_conn;
-    SimpleIOThread* thread;
+    SimpleNewConnection* new_conn;
+    // Acceptor 单独开一个线程，用于监听端口的新建连接事件
+    SimpleIOThread* thread; 
 };
 
 // 监听端口可读事件回调
-// 这个函数内部会调用TcpServer的NewConnection函数
+// 这个函数内部会调用Server的NewConnection函数
 static void simple_acceptor_handle_read(EventLoop* loop, int sock, void* user_data, int mask);
 
 static void simpel_acceptor_bind_and_listen(SimpleAcceptor* self);
 
-SimpleAcceptor* simple_acceptor_create(int port, NewConnectionCB* new_conn) {
+SimpleAcceptor* simple_acceptor_create(int port, SimpleNewConnection* new_conn, SimpleIOThread* thread) {
     SimpleAcceptor* self = malloc(sizeof(SimpleAcceptor));
     self->port = port;
     self->new_conn = new_conn;
-    self->thread = simple_io_thread_create();
+    self->thread = thread;
     return self;
 }
 
@@ -52,11 +52,13 @@ void simple_acceptor_start(SimpleAcceptor* self) {
         simple_acceptor_handle_read,
         self
     );
-
-    simple_io_thread_start(self->thread);
 }
 
 void simple_acceptor_stop(SimpleAcceptor* self) {
+    // TODO
+}
+
+void simple_acceptor_wait(SimpleAcceptor* self) {
     // TODO
 }
 
@@ -71,13 +73,11 @@ void simpel_acceptor_bind_and_listen(SimpleAcceptor* self) {
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servaddr.sin_port = htons(self->port);
 
-    if (-1 == bind(self->listen_fd, (struct sockaddr *) &servaddr, sizeof(servaddr)))
-    {
+    if (-1 == bind(self->listen_fd, (struct sockaddr *) &servaddr, sizeof(servaddr))) {
         ASSERT(false, "bind error, error msg: %s.", strerror(errno));
     }
 
-    if (-1 == listen(self->listen_fd, MAX_LISTENFD))
-    {
+    if (-1 == listen(self->listen_fd, MAX_LISTENFD)) {
         ASSERT(false, "bind error, errno: %d.", errno);
     }
 }
@@ -88,12 +88,9 @@ void simple_acceptor_handle_read(EventLoop* loop, int sock, void* user_data, int
     socklen_t sockaddr_len = sizeof(struct sockaddr_in);
 
     int conn_fd = accept(self->listen_fd, (struct sockaddr*) &client_addr, (socklen_t*) &sockaddr_len);
-    if (conn_fd <= 0)
-    {
+    if (conn_fd <= 0) {
         ASSERT(false, "accept error, conn_fd:%d, errno:%d ", conn_fd, errno);
-    }
-    else
-    {
+    } else {
         fcntl(conn_fd, F_SETFL, O_NONBLOCK); //no-block IO
     }
     self->new_conn(self->user_data, conn_fd);

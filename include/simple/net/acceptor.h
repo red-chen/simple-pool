@@ -1,14 +1,16 @@
-#ifndef SIMPLE_ACCEPTOR_H
-#define SIMPLE_ACCEPTOR_H
+#ifndef SIMPLE_NET_ACCEPTOR_H
+#define SIMPLE_NET_ACCEPTOR_H
 
-typedef struct simple_acceptor_t SimpleAcceptor;
+#include "define.h"
 
-SimpleAcceptor* simple_acceptor_create(int port, NewConnectionCB* cb);
-
-void simple_acceptor_destroy(SimpleAcceptor* self);
+SimpleAcceptor* simple_acceptor_create(int port, SimpleNewConnection* cb, SimpleIOThread* thread);
 
 void simple_acceptor_start(SimpleAcceptor* self);
 
 void simple_acceptor_stop(SimpleAcceptor* self);
+
+void simple_acceptor_wait(SimpleAcceptor* self);
+
+void simple_acceptor_destroy(SimpleAcceptor* self);
 
 #endif

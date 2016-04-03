@@ -14,10 +14,10 @@
  * 在Connection内部，一次完整的请求和响应我们抽象为Session
  */
 
-#ifndef SIMPLE_SERVER_H
-#define SIMPLE_SERVER_H
+#ifndef SIMPLE_NET_SERVER_H
+#define SIMPLE_NET_SERVER_H
 
-#include "../io/io_handler.h"
+#include "define.h"
 
 //  Server 相关的配置
 typedef struct simple_server_config_t {
@@ -25,23 +25,19 @@ typedef struct simple_server_config_t {
     // TODO 添加更多的选项，比如连接复用，超时等
 } SimpleServerConfig;
 
-typedef struct simpel_server_t SimpleServer;
-
 /**
  * 创建服务器
  *
  * 参数
  *     port 需要监听的端口
- *     handler IO时间绑定
+ *     handler 对应状态的处理函数
  *     config 服务器启动的相关配置，可以传入NULL
  */
 // TODO 这里port可以抽象为一个Address的对象，Address对象接收端口或者domain socket的路径
-SimpleServer* simple_server_create(int port, SimpleIOHandler* handler, SimpleServerConfig* config);
-
-/**
- * 销毁服务器
- */
-void simple_server_destroy(SimpleServer* self);
+SimpleServer* simple_server_create(
+        int port, 
+        SimpleHandler* handler, 
+        SimpleServerConfig* config);
 
 /**
  * 启动服务器
@@ -52,5 +48,17 @@ void simple_server_start(SimpleServer* self);
  * 关闭服务器
  */
 void simple_server_stop(SimpleServer* self);
+
+/**
+ * 等待服务器退出
+ */
+void simple_server_wait(SimpleServer* self);
+
+/**
+ * 销毁服务器
+ */
+void simple_server_destroy(SimpleServer* self);
+
+
 
 #endif
