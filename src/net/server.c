@@ -1,10 +1,13 @@
 #include "net/server.h"
+
 #include "net/acceptor.h"
+#include "net/connection.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-struct simpel_server_t {
+struct simple_server_t {
     int port;
     int index;
     SimpleHandler* handler;
@@ -20,7 +23,7 @@ SimpleServer* simple_server_create(int port, SimpleHandler* handler, SimpleServe
     SimpleServer* self = malloc(sizeof(SimpleServer));
     self->port = port;
     self->handler = handler;
-    simple_server_init_config(config, self->config);
+    simple_server_init_config(config, &(self->config));
     self->index = 0;
     self->threads = malloc(sizeof(SimpleIOThread*) * self->config.io_thread_count);
     for (int i = 0; i < self->config.io_thread_count; i++) {
@@ -63,7 +66,10 @@ void simple_server_new_conn_cb(void* user_data, int conn_fd) {
     // 从IO线程池中轮询选择一个IO线程
     // TODO 这里会有大量的连接，需要考虑使用内存池
     // TODO 检查连接数，如果过多考虑拒绝
-    SimpleConnection* conn = simple_connection_create(self->threads[self->index], conn_fd, self->handler);
+    SimpleConnection* conn = simple_connection_create(
+            self->threads[self->index], 
+            conn_fd, 
+            self->handler);
     simple_connection_establish(conn);
     if (++(self->index) >= self->config.io_thread_count ) {
         self->index = 0;

@@ -59,6 +59,4 @@ void simple_server_wait(SimpleServer* self);
  */
 void simple_server_destroy(SimpleServer* self);
 
-
-
 #endif
