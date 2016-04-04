@@ -6,9 +6,9 @@
 
 struct simpel_server_t {
     int port;
+    int index;
     SimpleHandler* handler;
     SimpleServerConfig config;
-    int index;
     SimpleIOThread** threads;
 };
 
@@ -38,6 +38,7 @@ void simple_server_start(SimpleServer* self) {
     SimpleAcceptor* acceptor = simple_acceptor_create(
         self->port,
         simple_server_new_conn_cb, // 注册一个新建连接的回调
+        self,
         self->threads[0]
     );
     simple_acceptor_start(acceptor);

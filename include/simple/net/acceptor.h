@@ -3,7 +3,13 @@
 
 #include "define.h"
 
-SimpleAcceptor* simple_acceptor_create(int port, SimpleNewConnection* cb, SimpleIOThread* thread);
+#include "io/io_thread.h"
+
+SimpleAcceptor* simple_acceptor_create(
+        int port, 
+        SimpleNewConnection* cb, 
+        void* user_data,
+        SimpleIOThread* thread);
 
 void simple_acceptor_start(SimpleAcceptor* self);
 
