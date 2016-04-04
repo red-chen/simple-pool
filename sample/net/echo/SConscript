@@ -1,0 +1,10 @@
+# -*- mode: python -*-
+# -*- coding: utf-8 -*-
+
+Import('env')
+
+env.Append(CPPPATH=['#/include/'])
+
+env.Append(LIBPATH=['#/lib/'])
+
+env.aProgram('net_server', ['server.c'], LIBS=['simple_static', 'pthread'])

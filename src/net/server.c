@@ -55,6 +55,10 @@ void simple_server_stop(SimpleServer* self) {
     // TODO
 }
 
+void simple_server_wait(SimpleServer* self) {
+    // TODO
+}
+
 void simple_server_init_config(SimpleServerConfig* input, SimpleServerConfig* out) {
     out->io_thread_count = input->io_thread_count;
     out->io_thread_count = out->io_thread_count <= 0 ? 1 : out->io_thread_count;

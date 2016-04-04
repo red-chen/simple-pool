@@ -3,6 +3,4 @@
 
 Import('env')
 
-env.aSubs('logging')
-env.aSubs('io')
-env.aSubs('net')
+env.aSubs('echo')
