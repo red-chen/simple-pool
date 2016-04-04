@@ -1,5 +1,21 @@
 #include "net/connection.h"
 
+#include "net/message.h"
+#include "io/io_thread.h"
+
+#include "event_loop.h"
+
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+
 #define SIMPLE_READ_BUF_SIZE 16 * 1024 //
 
 struct simple_connection_t {
@@ -7,13 +23,9 @@ struct simple_connection_t {
     SimpleIOThread* thread;
     SimpleHandler* handler;
 
-    SimpleMessgae* message;
+    SimpleMessage* message;
     void* input_data; // 存储接收到的数据
     void* output_data; // 存储将要发送的数据
-};
-
-struct simple_message_t {
-
 };
 
 static int simple_connection_read(
@@ -56,7 +68,17 @@ void simple_connection_establish(SimpleConnection* self) {
 
 int simple_connection_send(SimpleConnection* self, void* data) {
     // encode
-    return self->handler->encode(self, data);
+    self->handler->encode(self, data);
+
+    simple_io_thread_add_file_event(
+        self->thread,
+        self->sock,
+        AE_WRITABLE,
+        simple_connection_write,
+        self
+    );
+
+    return AE_OK;
 }
 
 void simple_connection_close(SimpleConnection* self) {
@@ -83,11 +105,10 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     // 不让某个大请求持续的占用线程，所以不能持续读取数据
     // TODO Buffer大小可以动态设置, 考虑Buffer动态在堆上分配或者编译决定大小
   
-    // TODO 直接使用message中的内存，减少一次拷贝
-    char buffer[SIMPLE_READ_BUF_SIZE] = {0};
+    void* buffer = simple_message_pointer(self->message, SIMPLE_READ_BUF_SIZE);
     int n = read(fd, buffer, SIMPLE_READ_BUF_SIZE);
     if (n > 0) {
-        simple_message_add(self->message, buffer, n);
+        simple_message_move(self->message, n);
         // build request
         void* data = self->handler->decode(self->message);
         if (data == NULL) {
@@ -106,8 +127,19 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
     SimpleConnection* self = (SimpleConnection*) user_data;
 
     // 读取发送队列中的数据，将数据发送出去，同理，也只调用一次write
+    // TODO 为了开发简单，仅仅调用一次write，后面重构
+    int n = write(fd, self->output_data, strlen(self->output_data) + 1);
+    if (n > 0) {
+        simple_io_thread_add_file_event(
+            self->thread,
+            self->sock,
+            AE_READABLE,
+            simple_connection_read,
+            self
+        );
+    } else {
+        simple_connection_close(self);
+    }
 
     return AE_NOMORE;
 }
-
-
