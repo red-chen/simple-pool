@@ -87,9 +87,9 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     char buffer[SIMPLE_READ_BUF_SIZE] = {0};
     int n = read(fd, buffer, SIMPLE_READ_BUF_SIZE);
     if (n > 0) {
-        simple_message_add(self->messgae, buffer, n);
+        simple_message_add(self->message, buffer, n);
         // build request
-        void* data = self->handler->decode(self->messgae);
+        void* data = self->handler->decode(self->message);
         if (data == NULL) {
             return AE_AGAIN;
         }

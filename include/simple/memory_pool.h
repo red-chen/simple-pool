@@ -14,6 +14,10 @@
 #ifndef SIMPLE_MEMORY_POOL_H
 #define SIMPLE_MEMORY_POOL_H
 
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 typedef struct memory_pool_t MemoryPool;
 
 // 创建内存池
