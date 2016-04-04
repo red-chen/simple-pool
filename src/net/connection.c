@@ -1,15 +1,19 @@
 #include "net/connection.h"
 
+#define SIMPLE_READ_BUF_SIZE 16 * 1024 //
+
 struct simple_connection_t {
     int sock;
     SimpleIOThread* thread;
     SimpleHandler* handler;
 
-    //
-    SimpleSession* session;
+    SimpleMessgae* message;
+    void* input_data; // 存储接收到的数据
+    void* output_data; // 存储将要发送的数据
 };
 
-struct simple_session_t {
+struct simple_message_t {
+
 };
 
 static int simple_connection_read(
@@ -50,8 +54,9 @@ void simple_connection_establish(SimpleConnection* self) {
     );
 }
 
-int simple_connection_send(SimpleConnection* self, SimpleRequest* r) {
+int simple_connection_send(SimpleConnection* self, void* data) {
     // encode
+    return self->handler->encode(self, data);
 }
 
 void simple_connection_close(SimpleConnection* self) {
@@ -77,7 +82,23 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     // 因为我们的Buffer接收大小默认开启为16KB，单次足够满足大多数的请求需要，为了
     // 不让某个大请求持续的占用线程，所以不能持续读取数据
     // TODO Buffer大小可以动态设置, 考虑Buffer动态在堆上分配或者编译决定大小
-   
+  
+    // TODO 直接使用message中的内存，减少一次拷贝
+    char buffer[SIMPLE_READ_BUF_SIZE] = {0};
+    int n = read(fd, buffer, SIMPLE_READ_BUF_SIZE);
+    if (n > 0) {
+        simple_message_add(self->messgae, buffer, n);
+        // build request
+        void* data = self->handler->decode(self->messgae);
+        if (data == NULL) {
+            return AE_AGAIN;
+        }
+        self->input_data = data;
+        self->handler->process(self);
+    } else {
+        simple_connection_close(self);
+    }
+
     return AE_NOMORE;
 }
 

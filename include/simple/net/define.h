@@ -8,9 +8,6 @@
 typedef struct simple_server_t SimpleServer;
 typedef struct simple_acceptor_t SimpleAcceptor;
 typedef struct simple_connection_t SimpleConnection;
-typedef struct simple_session_t SimpleSession;
-typedef struct simple_request_t SimpleRequest;
-typedef struct simple_response_t SimpleResponse;
 typedef struct simple_message_t SimpleMessage;
 
 // ----------------------------------------------
@@ -26,7 +23,7 @@ typedef int SimpleIdleConn(SimpleConnection* c);
  *
  * 将用户数据打包到发送的Buffer中
  */
-typedef int SimpleEncode(SimpleRequest* r, void* data);
+typedef int SimpleEncode(SimpleConnection* r, void* data);
 
 /**
  * 数据解析函数
@@ -34,10 +31,12 @@ typedef int SimpleEncode(SimpleRequest* r, void* data);
  * 该函数的主要目的是读取SimpleMessage中的数据，尝试构造为一个
  * 完整的数据包，并将数据包返回给系统。
  *
+ * 比如一个完整的Http请求等
+ *
  * 调用位置：connection的read事件函数中
  */
 typedef void* SimpleDecode(SimpleMessage* m);
-typedef int SimpleProcess(SimpleRequest* r);
+typedef int SimpleProcess(SimpleConnection* s);
 
 typedef struct simple_handler_t {
     SimpleNewConn* new_conn; // 可选
