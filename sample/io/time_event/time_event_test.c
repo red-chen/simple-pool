@@ -26,7 +26,7 @@ int main() {
     signal(SIGINT, handle_sig);
     signal(SIGTERM, handle_sig);
 
-    SimpleIOThread* t = simple_io_thread_create();
+    SimpleIOThread* t = simple_io_thread_create(NULL);
 
     // 每1000毫秒定时打印一次hello world
     simple_io_thread_add_time_event(t, 1000, mye_time_func, "hello world", NULL);

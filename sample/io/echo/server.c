@@ -83,7 +83,7 @@ int main() {
     signal(SIGTERM, handle_sig);
 
     // 初始化IO线程
-    SimpleIOThread* t = simple_io_thread_create();
+    SimpleIOThread* t = simple_io_thread_create(NULL);
 
     // 设置Tcp
     int fd = socket(AF_INET, SOCK_STREAM, 0); 

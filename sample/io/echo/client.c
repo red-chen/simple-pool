@@ -63,7 +63,7 @@ int main() {
     signal(SIGINT, handle_sig);
     signal(SIGTERM, handle_sig);
 
-    SimpleIOThread* t = simple_io_thread_create();
+    SimpleIOThread* t = simple_io_thread_create(NULL);
 
     struct sockaddr_in server_addr, client_addr;
     bzero(&server_addr, sizeof(server_addr));
