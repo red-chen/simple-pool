@@ -41,7 +41,7 @@ int main() {
 
     // 初始化配置
     SimpleServerConfig conf;
-    conf.io_thread_count = 1;
+    conf.io_thread_count = 2;
 
     SimpleServer* s = simple_server_create(11233, &handler, &conf);
 
@@ -77,6 +77,8 @@ int handle_encode(SimpleConnection* c, void* data) {
 
 int handle_process(SimpleConnection* c) {
     printf("handle_process\n");
+    SimpleIOThread* t = simple_connection_get_thread(c);
+    printf("use io thread: %s \n", simple_io_thread_get_name(t));
     return AE_OK;
 }
 

@@ -7,4 +7,4 @@ env.Append(CPPPATH=['#/include/'])
 
 env.Append(LIBPATH=['#/lib/'])
 
-env.aProgram('time_event_test', ['time_event_test.c'], LIBS=['simple_static', 'pthread'])
+env.aProgram('io_time_event_test', ['time_event_test.c'], LIBS=['simple_static', 'pthread'])

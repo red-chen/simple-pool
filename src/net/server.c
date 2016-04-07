@@ -27,7 +27,9 @@ SimpleServer* simple_server_create(int port, SimpleHandler* handler, SimpleServe
     self->index = 0;
     self->threads = malloc(sizeof(SimpleIOThread*) * self->config.io_thread_count);
     for (int i = 0; i < self->config.io_thread_count; i++) {
-        self->threads[i] = simple_io_thread_create();
+        char name[64] = {0};
+        sprintf(name, "server_t_%d", i);
+        self->threads[i] = simple_io_thread_create(name);
     }
     return self;
 }

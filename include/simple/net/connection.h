@@ -26,4 +26,6 @@ int simple_connection_send(SimpleConnection* self, void* data);
 
 void simple_connection_close(SimpleConnection* self);
 
+SimpleIOThread* simple_connection_get_thread(SimpleConnection* self);
+
 #endif

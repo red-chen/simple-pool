@@ -11,6 +11,7 @@
 typedef void* ThreadWorker(void*);
 
 struct simple_io_thread_t {
+    char name[64];
     pthread_t thread_id;
     bool running;
     ThreadWorker* worker;
@@ -48,7 +49,7 @@ static void* run_loop(void* input) {
     return NULL;
 }
 
-SimpleIOThread* simple_io_thread_create() {
+SimpleIOThread* simple_io_thread_create(const char* name) {
     SimpleIOThread* self = malloc(sizeof(SimpleIOThread));
     bzero(self, sizeof(SimpleIOThread));
 
@@ -56,7 +57,14 @@ SimpleIOThread* simple_io_thread_create() {
     self->loop = event_loop_create(1024);
     self->running = false;
 
+    if (name != NULL) {
+        strcpy(self->name, name);
+    }
     return self;
+}
+
+const char* simple_io_thread_get_name(SimpleIOThread* self) {
+    return self->name;
 }
 
 void simple_io_thread_destroy(SimpleIOThread* self) {
