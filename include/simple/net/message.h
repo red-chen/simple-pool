@@ -40,4 +40,5 @@ void* simple_message_data(SimpleMessage* self);
  * 清除所有数据
  */
 void simple_message_clear(SimpleMessage* self);
+
 #endif

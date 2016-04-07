@@ -92,6 +92,7 @@ void simple_connection_close(SimpleConnection* self) {
 // ---------------------------------------------------
 
 int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
+    puts("a");
     SimpleConnection* self = (SimpleConnection*) user_data;
     // TODO 怎么知道要读多少数据呢？
     // 比如一个结构，因为用户才知道要读多少数据，所以这里应该嵌入用户的逻辑
@@ -107,20 +108,30 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     // TODO Buffer大小可以动态设置, 考虑Buffer动态在堆上分配或者编译决定大小
   
     void* buffer = simple_message_pointer(self->message, SIMPLE_READ_BUF_SIZE);
+    puts("b");
     int n = read(fd, buffer, SIMPLE_READ_BUF_SIZE);
+    puts("c");
     if (n > 0) {
+    puts("c1");
         simple_message_move(self->message, n);
+    puts("c2");
         // build request
         void* data = self->handler->decode(self->message);
+    puts("c3");
         if (data == NULL) {
             return AE_AGAIN;
         }
+    puts("c4");
         self->input_data = data;
+    puts("c5");
         self->handler->process(self);
+    puts("c6");
     } else {
+    puts("d");
         simple_connection_close(self);
     }
 
+    puts("e");
     return AE_NOMORE;
 }
 

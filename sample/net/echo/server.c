@@ -1,4 +1,5 @@
 #include <simple/net/define.h>
+#include <simple/net/message.h>
 #include <simple/net/server.h>
 #include <simple/net/connection.h>
 
@@ -64,14 +65,18 @@ int handle_new_conn(SimpleConnection* c) {
 }
 
 void* handle_decode(SimpleMessage* m) {
-    return NULL;
+    printf("handle_decode\n");
+    printf("data:%s\n", (char*)simple_message_data(m));
+    return simple_message_data(m);
 }
 
 int handle_encode(SimpleConnection* c, void* data) {
+    printf("handle_encode\n");
     return AE_OK;
 }
 
 int handle_process(SimpleConnection* c) {
+    printf("handle_process\n");
     return AE_OK;
 }
 
