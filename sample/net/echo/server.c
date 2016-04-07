@@ -59,6 +59,7 @@ int main() {
 
 // ----------------------------------------------------------------
 int handle_new_conn(SimpleConnection* c) {
+    printf("new connection !");
     return AE_OK;
 }
 

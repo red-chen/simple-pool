@@ -48,6 +48,7 @@ SimpleConnection* simple_connection_create(
     self->sock = sock;
     self->thread = thread;
     self->handler = handler;
+    self->message = simple_message_create();
     return self;
 }
 

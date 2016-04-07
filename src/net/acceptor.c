@@ -66,6 +66,7 @@ void simple_acceptor_wait(SimpleAcceptor* self) {
 }
 
 void simpel_acceptor_bind_and_listen(SimpleAcceptor* self) {
+    printf("simpel_acceptor_bind_and_listen\n");
     bool on = true;
     self->listen_fd = socket(AF_INET, SOCK_STREAM, 0);
     fcntl(self->listen_fd, F_SETFL, O_NONBLOCK); //no-block IO
@@ -86,16 +87,22 @@ void simpel_acceptor_bind_and_listen(SimpleAcceptor* self) {
 }
 
 int simple_acceptor_handle_read(EventLoop* loop, int sock, void* user_data, int mask) {
+    printf("simple_acceptor_handle_read\n");
     SimpleAcceptor* self = (SimpleAcceptor*) user_data;
     struct sockaddr_in client_addr;
     socklen_t sockaddr_len = sizeof(struct sockaddr_in);
+    
+    printf("1\n");
 
     int conn_fd = accept(self->listen_fd, (struct sockaddr*) &client_addr, (socklen_t*) &sockaddr_len);
+    printf("2\n");
     if (conn_fd <= 0) {
         ASSERT(false, "accept error, conn_fd:%d, errno:%d ", conn_fd, errno);
     } else {
         fcntl(conn_fd, F_SETFL, O_NONBLOCK); //no-block IO
     }
+    printf("3\n");
     self->new_conn(self->user_data, conn_fd);
+    printf("4\n");
     return AE_OK;
 }
