@@ -28,4 +28,8 @@ void simple_connection_close(SimpleConnection* self);
 
 SimpleIOThread* simple_connection_get_thread(SimpleConnection* self);
 
+SimpleMessage* simple_connection_get_in(SimpleConnection* self);
+
+SimpleMessage* simple_connection_get_out(SimpleConnection* self);
+
 #endif

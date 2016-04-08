@@ -34,6 +34,8 @@ int main() {
 
     // 准备Handler
     SimpleHandler handler;
+    bzero(&handler, sizeof(SimpleHandler));
+
     handler.new_conn = handle_new_conn;
     handler.decode = handle_decode;
     handler.encode = handle_encode;
@@ -60,18 +62,21 @@ int main() {
 
 // ----------------------------------------------------------------
 int handle_new_conn(SimpleConnection* c) {
-    printf("new connection !");
+    printf("new connection\n");
     return AE_OK;
 }
 
 void* handle_decode(SimpleMessage* m) {
     printf("handle_decode\n");
-    printf("data:%s\n", (char*)simple_message_data(m));
-    return simple_message_data(m);
+    printf("data:%s\n", (char*)simple_message_get_pull_ptr(m));
+    return simple_message_get_pull_ptr(m);
 }
 
 int handle_encode(SimpleConnection* c, void* data) {
     printf("handle_encode\n");
+    SimpleMessage* out = simple_connection_get_out(c);
+    simple_message_add(out, data, strlen(data) + 1);
+    printf("handle_encode end\n");
     return AE_OK;
 }
 
@@ -79,6 +84,8 @@ int handle_process(SimpleConnection* c) {
     printf("handle_process\n");
     SimpleIOThread* t = simple_connection_get_thread(c);
     printf("use io thread: %s \n", simple_io_thread_get_name(t));
+    SimpleMessage* in = simple_connection_get_in(c);
+    simple_connection_send(c, simple_message_get(in));
     return AE_OK;
 }
 

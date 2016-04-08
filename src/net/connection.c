@@ -23,9 +23,8 @@ struct simple_connection_t {
     SimpleIOThread* thread;
     SimpleHandler* handler;
 
-    SimpleMessage* message;
-    void* input_data; // 存储接收到的数据
-    void* output_data; // 存储将要发送的数据
+    SimpleMessage* in; // 存储接收到的数据 
+    SimpleMessage* out; // 存储将要发送的数据
 };
 
 static int simple_connection_read(
@@ -48,7 +47,8 @@ SimpleConnection* simple_connection_create(
     self->sock = sock;
     self->thread = thread;
     self->handler = handler;
-    self->message = simple_message_create();
+    self->in = simple_message_create();
+    self->out = simple_message_create();
     return self;
 }
 
@@ -68,6 +68,9 @@ void simple_connection_establish(SimpleConnection* self) {
 }
 
 int simple_connection_send(SimpleConnection* self, void* data) {
+
+    // TODO 可以通过connection申请data内存，降低拷贝次数
+
     // encode
     self->handler->encode(self, data);
 
@@ -83,10 +86,12 @@ int simple_connection_send(SimpleConnection* self, void* data) {
 }
 
 void simple_connection_close(SimpleConnection* self) {
+    puts("simple_connection_close begin");
     if (self->handler->dis_conn != NULL) {
         self->handler->dis_conn(self);
     }
     // TODO
+    puts("simple_connection_close end");
 }
 
 // ---------------------------------------------------
@@ -106,16 +111,15 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     // 不让某个大请求持续的占用线程，所以不能持续读取数据
     // TODO Buffer大小可以动态设置, 考虑Buffer动态在堆上分配或者编译决定大小
   
-    void* buffer = simple_message_pointer(self->message, SIMPLE_READ_BUF_SIZE);
+    void* buffer = simple_message_get_push_ptr(self->in, SIMPLE_READ_BUF_SIZE);
     int n = read(fd, buffer, SIMPLE_READ_BUF_SIZE);
     if (n > 0) {
-        simple_message_move(self->message, n);
+        simple_message_set_push_size(self->in, n);
         // build request
-        void* data = self->handler->decode(self->message);
+        void* data = self->handler->decode(self->in);
         if (data == NULL) {
             return AE_AGAIN;
         }
-        self->input_data = data;
         self->handler->process(self);
     } else {
         simple_connection_close(self);
@@ -127,17 +131,26 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
 int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) {
     SimpleConnection* self = (SimpleConnection*) user_data;
 
+    void* data = simple_message_get_pull_ptr(self->out);
+    int size = simple_message_size(self->out);
+
     // 读取发送队列中的数据，将数据发送出去，同理，也只调用一次write
     // TODO 为了开发简单，仅仅调用一次write，后面重构
-    int n = write(fd, self->output_data, strlen(self->output_data) + 1);
+    int n = write(fd, data, size);
+
     if (n > 0) {
-        simple_io_thread_add_file_event(
-            self->thread,
-            self->sock,
-            AE_READABLE,
-            simple_connection_read,
-            self
-        );
+        if (n >= size) {
+            simple_io_thread_add_file_event(
+                self->thread,
+                self->sock,
+                AE_READABLE,
+                simple_connection_read,
+                self
+            );
+        } else {
+            simple_message_set_pull_size(self->out, n);
+            return AE_AGAIN;
+        }
     } else {
         simple_connection_close(self);
     }
@@ -147,4 +160,12 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
 
 SimpleIOThread* simple_connection_get_thread(SimpleConnection* self) {
     return self->thread;
+}
+
+SimpleMessage* simple_connection_get_in(SimpleConnection* self) {
+    return self->in;
+}
+
+SimpleMessage* simple_connection_get_out(SimpleConnection* self) {
+    return self->out;
 }
