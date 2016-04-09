@@ -1,6 +1,7 @@
 /**
  * @file io_thread.h
- * @brief IO线程，主要是负责IO事件处理，IO线程中包括了一个独立的事件循环
+ * @brief IO线程，主要是负责IO事件处理，IO线程中包括了一个独立的事件循环 
+ * one loop one thread
  * @author chen wan hong, redchen1255@gmail.com
  * @version 
  * @date 2016-04-07
@@ -74,9 +75,6 @@ EventLoop* simple_io_thread_get_loop(SimpleIOThread* self);
  */
 const char* simple_io_thread_get_name(SimpleIOThread* self);
 
-/**
- * 向线程中添加文件事件
- */
 int simple_io_thread_add_file_event(
         SimpleIOThread* self,
         int fd,
@@ -84,9 +82,6 @@ int simple_io_thread_add_file_event(
         FileFunc* func,
         void* user_data);
 
-/**
- * 删除文件事件
- */
 void simple_io_thread_del_file_event(
 	SimpleIOThread* self, 
 	int fd, 
