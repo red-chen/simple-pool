@@ -23,8 +23,14 @@ struct simple_connection_t {
     SimpleIOThread* thread;
     SimpleHandler* handler;
 
-    SimpleMessage* in; // 存储接收到的数据 
-    SimpleMessage* out; // 存储将要发送的数据
+    // 存储接收到的数据
+    SimpleMessage* in; 
+    // 当数据满足大小需要时，就将message中的数据构建了一个对象
+    void* in_data; 
+    // 存储将要发送的数据
+    SimpleMessage* out;
+    // 存储用户写入数据的指针，系统之后会调用encode函数，将数据写入out message中
+    void* out_data;
 };
 
 static int simple_connection_read(
