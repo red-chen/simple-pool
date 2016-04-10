@@ -63,7 +63,7 @@ void simple_connection_establish(SimpleConnection* self) {
         self->handler->new_conn(self);
     }
 
-    // TODO 如果仅仅发送数据，是否需要注册读事件回调
+    // TODO 如果仅仅发送数据，是否需要注册读事件回调?
     simple_io_thread_add_file_event(
         self->thread,
         self->sock,
@@ -137,8 +137,15 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
 int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) {
     SimpleConnection* self = (SimpleConnection*) user_data;
 
+    // new_packet
+    if (self->handler->new_packet != NULL) {
+        self->handler->new_packet(self);
+    }
+
     void* data = simple_message_get_pull_ptr(self->out);
     int size = simple_message_size(self->out);
+
+    // TODO 考虑是否需要坚持size ？
 
     // 读取发送队列中的数据，将数据发送出去，同理，也只调用一次write
     // TODO 为了开发简单，仅仅调用一次write，后面重构
