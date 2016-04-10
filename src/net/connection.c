@@ -71,6 +71,14 @@ void simple_connection_establish(SimpleConnection* self) {
         simple_connection_read,
         self
     );
+
+    simple_io_thread_add_file_event(
+        self->thread,
+        self->sock,
+        AE_WRITABLE,
+        simple_connection_write,
+        self
+    );
 }
 
 int simple_connection_send(SimpleConnection* self, void* data) {
@@ -80,13 +88,13 @@ int simple_connection_send(SimpleConnection* self, void* data) {
     // encode
     self->handler->encode(self, data);
 
-    simple_io_thread_add_file_event(
-        self->thread,
-        self->sock,
-        AE_WRITABLE,
-        simple_connection_write,
-        self
-    );
+    //simple_io_thread_add_file_event(
+    //    self->thread,
+    //    self->sock,
+    //    AE_WRITABLE,
+    //    simple_connection_write,
+    //    self
+    //);
 
     return AE_OK;
 }

@@ -43,6 +43,8 @@ static int handle_encode(SimpleConnection* c, void* data);
 
 static int handle_process(SimpleConnection* c);
 
+static int count = 0;
+
 int main() {
     // 设置信号处理
     signal(SIGINT, handle_sig);
@@ -71,7 +73,7 @@ int main() {
 
     simple_client_start(s);
 
-    while(RUNNING) {
+    while(RUNNING && count < 10) {
         sleep(1);
     }
 
@@ -84,7 +86,6 @@ int main() {
 
 // ----------------------------------------------------------------
 
-int count = 0;
 
 int handle_new_conn(SimpleConnection* c) {
     printf("new connection\n");
