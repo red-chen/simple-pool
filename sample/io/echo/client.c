@@ -1,13 +1,3 @@
-/*
- *  server
- *  1. make -B
- *  2. ./server
- *
- *  client
- *  1. make -B
- *  2 ./client
- *
- */
 #include <simple/io/io_thread.h>
 
 #include <sys/epoll.h>

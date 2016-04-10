@@ -15,6 +15,8 @@
 #include <simple/net/client.h>
 #include <simple/net/connection.h>
 
+#include <simple/atomic.h>
+
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
@@ -51,6 +53,7 @@ int main() {
     bzero(&handler, sizeof(SimpleHandler));
 
     handler.new_conn = handle_new_conn;
+    handler.new_packet = handle_new_packet;
     handler.decode = handle_decode;
     handler.encode = handle_encode;
     handler.process = handle_process;
@@ -60,6 +63,11 @@ int main() {
     conf.io_thread_count = 2;
 
     SimpleClient* s = simple_client_create("127.0.0.1", 11233, &handler, &conf);
+
+
+    for (int i = 0; i < 10; i++) {
+        simple_client_connect(s);
+    }
 
     simple_client_start(s);
 
@@ -75,8 +83,22 @@ int main() {
 }
 
 // ----------------------------------------------------------------
+
+int count = 0;
+
 int handle_new_conn(SimpleConnection* c) {
     printf("new connection\n");
+    return AE_OK;
+}
+
+int handle_new_packet(SimpleConnection* c) {
+    if (count > 10) {
+        return AE_OK;   
+    }
+
+    ATOMIC_INC(&count);
+
+    simple_connection_send(c, "hello world");
     return AE_OK;
 }
 
@@ -99,6 +121,6 @@ int handle_process(SimpleConnection* c) {
     SimpleIOThread* t = simple_connection_get_thread(c);
     printf("use io thread: %s \n", simple_io_thread_get_name(t));
     SimpleMessage* in = simple_connection_get_in(c);
-    simple_connection_send(c, simple_message_get(in));
+    printf("data:%s\n", (char*)simple_message_get_pull_ptr(in));
     return AE_OK;
 }

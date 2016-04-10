@@ -2,9 +2,18 @@
 
 #include "net/connection.h"
 
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <signal.h>
 
 struct simple_client_t {
     char host[64];

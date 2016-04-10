@@ -5,6 +5,7 @@
 // 基础对象声明
 // ----------------------------------------------
 
+typedef struct simple_client_t SimpleClient;
 typedef struct simple_server_t SimpleServer;
 typedef struct simple_acceptor_t SimpleAcceptor;
 typedef struct simple_connection_t SimpleConnection;
