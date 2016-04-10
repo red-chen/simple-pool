@@ -69,7 +69,10 @@ int simple_client_connect(SimpleClient* self) {
             self->threads[self->index], 
             conn_fd, 
             self->handler);
+
     simple_connection_establish(conn);
+
+    return 0;
 }
 
 void simple_client_start(SimpleClient* self) {

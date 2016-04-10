@@ -88,13 +88,13 @@ int simple_connection_send(SimpleConnection* self, void* data) {
     // encode
     self->handler->encode(self, data);
 
-    //simple_io_thread_add_file_event(
-    //    self->thread,
-    //    self->sock,
-    //    AE_WRITABLE,
-    //    simple_connection_write,
-    //    self
-    //);
+    simple_io_thread_add_file_event(
+        self->thread,
+        self->sock,
+        AE_WRITABLE,
+        simple_connection_write,
+        self
+    );
 
     return AE_OK;
 }
@@ -111,6 +111,7 @@ void simple_connection_close(SimpleConnection* self) {
 // ---------------------------------------------------
 
 int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
+    puts("simple_connection_read begin");
     SimpleConnection* self = (SimpleConnection*) user_data;
     // TODO 怎么知道要读多少数据呢？
     // 比如一个结构，因为用户才知道要读多少数据，所以这里应该嵌入用户的逻辑
@@ -138,11 +139,12 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     } else {
         simple_connection_close(self);
     }
-
+    puts("simple_connection_read end");
     return AE_NOMORE;
 }
 
 int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) {
+    puts("simple_connection_write begin");
     SimpleConnection* self = (SimpleConnection*) user_data;
 
     // new_packet
@@ -175,7 +177,7 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
     } else {
         simple_connection_close(self);
     }
-
+    puts("simple_connection_write end");
     return AE_NOMORE;
 }
 

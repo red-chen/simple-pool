@@ -44,6 +44,7 @@ static int handle_encode(SimpleConnection* c, void* data);
 static int handle_process(SimpleConnection* c);
 
 static int count = 0;
+static int result = 0;
 
 int main() {
     // 设置信号处理
@@ -73,7 +74,7 @@ int main() {
 
     simple_client_start(s);
 
-    while(RUNNING && count < 10) {
+    while(RUNNING && result < 10) {
         sleep(1);
     }
 
@@ -123,5 +124,8 @@ int handle_process(SimpleConnection* c) {
     printf("use io thread: %s \n", simple_io_thread_get_name(t));
     SimpleMessage* in = simple_connection_get_in(c);
     printf("data:%s\n", (char*)simple_message_get_pull_ptr(in));
+
+    ATOMIC_INC(&result);
+
     return AE_OK;
 }
