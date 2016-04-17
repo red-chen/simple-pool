@@ -49,7 +49,11 @@ SimpleClient* simple_client_create(
 }
 
 void simple_client_destroy(SimpleClient* self) {
-    // TODO
+    for (int i = 0; i < self->config.io_thread_count; i++) {
+        simple_io_thread_destroy(self->threads[i]);
+    }
+    free(self->threads);
+    free(self);
 }
 
 int simple_client_connect(SimpleClient* self) {
@@ -64,7 +68,6 @@ int simple_client_connect(SimpleClient* self) {
 
     int conn_fd = socket(AF_INET, SOCK_STREAM, 0);
     
-    // TODO check succ
     int ret = connect(conn_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
     ASSERT(ret == 0, "connect the remote address fail !");
 
@@ -89,11 +92,15 @@ void simple_client_start(SimpleClient* self) {
 }
 
 void simple_client_stop(SimpleClient* self) {
-    // TODO
+    for (int i = 0; i < self->config.io_thread_count; i++) {
+        simple_io_thread_stop(self->threads[i]);
+    }
 }
 
 void simple_client_wait(SimpleClient* self) {
-    // TODO
+    for (int i = 0; i < self->config.io_thread_count; i++) {
+        simple_io_thread_join(self->threads[i]);
+    }
 }
 
 void simple_client_init_config(SimpleClientConfig* input, SimpleClientConfig* out) {

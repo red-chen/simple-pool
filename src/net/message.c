@@ -29,7 +29,8 @@ void* simple_message_get_push_ptr(SimpleMessage* self, int size) {
     // TODO refine  这里太过于简单了
     int f = self->capacity - self->size;
     if (size > f) {
-        ASSERT(false, "alloc mem fail. size: %d.", size);
+        WARN("alloc mem fail. size: %d.", size);
+        return NULL;
     }
     return self->push_index;
 }
@@ -38,7 +39,8 @@ int simple_message_set_push_size(SimpleMessage* self, int size) {
     int f = self->capacity - self->size;
     // TODO 这里考虑快速开发，直接检查失败退出即可，后面需要refine
     if (size > f) {
-        ASSERT(false, "push data fail. size: %d.", size);
+        WARN("push data fail. size: %d.", size);
+        return f - size;
     }
     self->push_index += size;
     self->size += size;
@@ -52,7 +54,8 @@ void* simple_message_get_pull_ptr(SimpleMessage* self) {
 int simple_message_set_pull_size(SimpleMessage* self, int size) {
     // TODO 这里考虑快速开发，直接检查失败退出即可，后面需要refine
     if (size > self->size) {
-        ASSERT(false, "pull size fail. size: %d.", size);
+        WARN("set pull size fail. size: %d.", size);
+        return self->size - size;
     }
     self->pull_index += size;
     self->size -= size;
@@ -79,7 +82,8 @@ int simple_message_add(SimpleMessage* self, void* data, int size) {
     int f = self->capacity - self->size;
     // TODO 这里考虑快速开发，直接检查失败退出即可，后面需要refine
     if (size > f) {
-        ASSERT(false, "add data fail. size: %d.", size);
+        WARN("add data fail. size: %d.", size);
+        return f - size;
     }
     memcpy(self->push_index, data, size);
     self->push_index += size;

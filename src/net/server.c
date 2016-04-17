@@ -35,11 +35,16 @@ SimpleServer* simple_server_create(int port, SimpleHandler* handler, SimpleServe
 }
 
 void simple_server_destroy(SimpleServer* self) {
-    // TODO
+    for (int i = 0; i < self->config.io_thread_count; i++) {
+        simple_io_thread_destroy(self->threads[i]);
+    }
+    free(self->threads);
+    free(self);
 }
 
 void simple_server_start(SimpleServer* self) {
-    // TODO 这里是使用的工作的线程，如果工作的线程被挂起，那么整个接收连接也将被挂起，需要考虑优化
+    // TODO 这里是使用的工作的线程，如果工作的线程被挂起，那么整个接收
+    // 连接也将被挂起，需要考虑优化。
     SimpleAcceptor* acceptor = simple_acceptor_create(
         self->port,
         simple_server_new_conn_cb, // 注册一个新建连接的回调
@@ -54,11 +59,15 @@ void simple_server_start(SimpleServer* self) {
 }
 
 void simple_server_stop(SimpleServer* self) {
-    // TODO
+    for (int i = 0; i < self->config.io_thread_count; i++) {
+        simple_io_thread_stop(self->threads[i]);
+    }
 }
 
 void simple_server_wait(SimpleServer* self) {
-    // TODO
+    for (int i = 0; i < self->config.io_thread_count; i++) {
+        simple_io_thread_join(self->threads[i]);
+    }
 }
 
 void simple_server_init_config(SimpleServerConfig* input, SimpleServerConfig* out) {
