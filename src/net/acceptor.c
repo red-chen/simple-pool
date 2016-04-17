@@ -32,7 +32,11 @@ static int simple_acceptor_handle_read(EventLoop* loop, int sock, void* user_dat
 
 static void simpel_acceptor_bind_and_listen(SimpleAcceptor* self);
 
-SimpleAcceptor* simple_acceptor_create(int port, SimpleNewConnection* new_conn, void* user_data, SimpleIOThread* thread) {
+SimpleAcceptor* simple_acceptor_create(
+        int port, 
+        SimpleNewConnection* new_conn, 
+        void* user_data, 
+        SimpleIOThread* thread) {
     SimpleAcceptor* self = malloc(sizeof(SimpleAcceptor));
     self->port = port;
     self->new_conn = new_conn;
@@ -42,7 +46,7 @@ SimpleAcceptor* simple_acceptor_create(int port, SimpleNewConnection* new_conn, 
 }
 
 void simple_acceptor_destroy(SimpleAcceptor* self) {
-    // TODO
+    free(self);
 }
 
 void simple_acceptor_start(SimpleAcceptor* self) {
@@ -58,11 +62,16 @@ void simple_acceptor_start(SimpleAcceptor* self) {
 }
 
 void simple_acceptor_stop(SimpleAcceptor* self) {
-    // TODO
+    // 删除监听事件
+    simple_io_thread_del_file_event(
+        self->thread,
+        self->listen_fd,
+        AE_READABLE
+    );
 }
 
 void simple_acceptor_wait(SimpleAcceptor* self) {
-    // TODO
+    // do nothing
 }
 
 void simpel_acceptor_bind_and_listen(SimpleAcceptor* self) {
