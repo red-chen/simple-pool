@@ -13,11 +13,18 @@
 #include <unistd.h>
 #include <signal.h>
 
+struct User {
+    int size;
+    int sock;
+};
+
 static bool RUNNING = true;
 
 static char buffer[1024] = {0};
 
 static int count = 0;
+
+static int limit = 10;
 
 static void handle_sig(int sig) {
     printf("Get signal: %d\n", sig);
@@ -29,9 +36,10 @@ static int handle_write(EventLoop* loop, int fd, void* user_data, int mask);
 
 // Implement file func
 int handle_write(EventLoop* loop, int fd, void* user_data, int mask) {
-    printf("%s\n", buffer);
-    write(fd, buffer, strlen(buffer) + 1);
-    if (count++ < 10) {
+    struct User* u = (struct User*)user_data;
+    if (count++ < limit) {
+        printf("fd:%d, sock:%d\n", fd, u->sock);
+        write(fd, buffer, strlen(buffer) + 1);
         event_loop_add_file_event(loop, fd, AE_READABLE, handle_read, buffer);    
     } else {
         close(fd);
@@ -49,12 +57,7 @@ int handle_read(EventLoop* loop, int fd, void* user_data, int mask) {
     return AE_NOMORE;
 }
 
-int main() {
-    signal(SIGINT, handle_sig);
-    signal(SIGTERM, handle_sig);
-
-    SimpleIOThread* t = simple_io_thread_create(NULL);
-
+int client_connect() {
     struct sockaddr_in server_addr, client_addr;
     bzero(&server_addr, sizeof(server_addr));
     bzero(&client_addr, sizeof(client_addr));
@@ -65,15 +68,35 @@ int main() {
 
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     connect(fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    return fd;
+}
+
+int main() {
+    signal(SIGINT, handle_sig);
+    signal(SIGTERM, handle_sig);
+
+    SimpleIOThread* t = simple_io_thread_create(NULL);
 
     strcpy(buffer, "hello world !");
 
-    // 将fd注册到io thread中
-    simple_io_thread_add_file_event(t, fd, AE_WRITABLE, handle_write, NULL);
+    for (int i = 0; i < limit; i++){
+        // 将fd注册到io thread中
+        int fd = client_connect();
+        struct User* u = malloc(sizeof(struct User));
+        u->sock = fd;
+        u->size = 1024;
+
+        simple_io_thread_add_file_event(
+                t, 
+                fd, 
+                AE_WRITABLE, 
+                handle_write, 
+                u);
+    }
 
     simple_io_thread_start(t);
 
-    while(RUNNING && count <= 10) {
+    while(RUNNING && count <= limit) {
         sleep(1);
     }
 

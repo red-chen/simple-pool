@@ -16,6 +16,7 @@
 #include <simple/net/connection.h>
 
 #include <simple/atomic.h>
+#include <simple/assert.h>
 
 #include <fcntl.h>
 #include <errno.h>
@@ -33,18 +34,15 @@ static void handle_sig(int sig) {
     RUNNING = false;
 }
 
-static int handle_new_conn(SimpleConnection* c);
-
 static int handle_new_packet(SimpleConnection* c);
-
 static void* handle_decode(SimpleMessage* m);
-
 static int handle_encode(SimpleConnection* c, void* data);
-
 static int handle_process(SimpleConnection* c);
 
 static int count = 0;
 static int result = 0;
+static int limit = 4;
+static int io_count = 1;
 
 int main() {
     // 设置信号处理
@@ -55,7 +53,6 @@ int main() {
     SimpleHandler handler;
     bzero(&handler, sizeof(SimpleHandler));
 
-    handler.new_conn = handle_new_conn;
     handler.new_packet = handle_new_packet;
     handler.decode = handle_decode;
     handler.encode = handle_encode;
@@ -63,18 +60,17 @@ int main() {
 
     // 初始化配置
     SimpleClientConfig conf;
-    conf.io_thread_count = 2;
+    conf.io_thread_count = io_count;
 
     SimpleClient* s = simple_client_create("127.0.0.1", 11233, &handler, &conf);
 
-
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < limit; i++) {
         simple_client_connect(s);
     }
 
     simple_client_start(s);
 
-    while(RUNNING && result < 10) {
+    while(RUNNING && result < limit) {
         sleep(1);
     }
 
@@ -87,13 +83,9 @@ int main() {
 
 // ----------------------------------------------------------------
 
-
-int handle_new_conn(SimpleConnection* c) {
-    printf("new connection\n");
-    return AE_OK;
-}
-
 int handle_new_packet(SimpleConnection* c) {
+    SimpleIOThread* t = simple_connection_get_thread(c);
+    ASSERT_NOT_NULL(t);
     if (count > 10) {
         return AE_OK;   
     }
@@ -105,27 +97,28 @@ int handle_new_packet(SimpleConnection* c) {
 }
 
 void* handle_decode(SimpleMessage* m) {
-    printf("handle_decode\n");
-    printf("data:%s\n", (char*)simple_message_get_pull_ptr(m));
     return simple_message_get_pull_ptr(m);
 }
 
 int handle_encode(SimpleConnection* c, void* data) {
-    printf("handle_encode\n");
+    SimpleIOThread* t = simple_connection_get_thread(c);
+    ASSERT_NOT_NULL(t);
     SimpleMessage* out = simple_connection_get_out(c);
     simple_message_add(out, data, strlen(data) + 1);
-    printf("handle_encode end\n");
     return AE_OK;
 }
 
 int handle_process(SimpleConnection* c) {
-    printf("handle_process\n");
     SimpleIOThread* t = simple_connection_get_thread(c);
-    printf("use io thread: %s \n", simple_io_thread_get_name(t));
+    ASSERT_NOT_NULL(t);
     SimpleMessage* in = simple_connection_get_in(c);
-    printf("data:%s\n", (char*)simple_message_get_pull_ptr(in));
+    
+    printf("handle process, data: %s, use io thread: %s \n", 
+            (char*)simple_message_get(in), 
+            (char*)simple_io_thread_get_name(t));
 
     ATOMIC_INC(&result);
 
+    simple_connection_close(c);
     return AE_OK;
 }

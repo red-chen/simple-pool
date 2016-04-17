@@ -77,6 +77,7 @@ void simple_server_new_conn_cb(void* user_data, int conn_fd) {
             conn_fd, 
             self->handler);
     simple_connection_establish(conn);
+
     if (++(self->index) >= self->config.io_thread_count ) {
         self->index = 0;
     }

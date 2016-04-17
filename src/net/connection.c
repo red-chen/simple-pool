@@ -4,6 +4,7 @@
 #include "io/io_thread.h"
 
 #include "event_loop.h"
+#include "assert.h"
 
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -19,9 +20,11 @@
 #define SIMPLE_READ_BUF_SIZE 16 * 1024 //
 
 struct simple_connection_t {
+    int head;
+    int head1;
     int sock;
-    SimpleIOThread* thread;
-    SimpleHandler* handler;
+    SimpleIOThread* thread; 
+    SimpleHandler* handler; 
 
     // 存储接收到的数据
     SimpleMessage* in; 
@@ -49,6 +52,8 @@ SimpleConnection* simple_connection_create(
         SimpleIOThread* thread, 
         int sock, 
         SimpleHandler* handler) {
+    ASSERT(sock > 0, "input fd invalid, fd:%d", sock);
+
     SimpleConnection* self = malloc(sizeof(SimpleConnection));
     self->sock = sock;
     self->thread = thread;
@@ -59,6 +64,8 @@ SimpleConnection* simple_connection_create(
 }
 
 void simple_connection_establish(SimpleConnection* self) {
+    ASSERT(self->sock > 0, "input fd invalid, fd:%d", self->sock);
+    ASSERT_NOT_NULL(self->thread);
     if (self->handler->new_conn != NULL) {
         self->handler->new_conn(self);
     }
@@ -71,6 +78,9 @@ void simple_connection_establish(SimpleConnection* self) {
         simple_connection_read,
         self
     );
+    
+    printf("establish, address: %p, fd: %d\n", self, self->sock);
+    ASSERT_NOT_NULL(self->thread);
 
     simple_io_thread_add_file_event(
         self->thread,
@@ -82,11 +92,16 @@ void simple_connection_establish(SimpleConnection* self) {
 }
 
 int simple_connection_send(SimpleConnection* self, void* data) {
+    ASSERT(self->sock > 0, "input fd invalid, fd:%d", self->sock);
+    ASSERT_NOT_NULL(self->thread);
 
     // TODO 可以通过connection申请data内存，降低拷贝次数
 
     // encode
     self->handler->encode(self, data);
+
+    printf("send, address: %p, fd: %d\n", self, self->sock);
+    ASSERT_NOT_NULL(self->thread);
 
     simple_io_thread_add_file_event(
         self->thread,
@@ -100,19 +115,21 @@ int simple_connection_send(SimpleConnection* self, void* data) {
 }
 
 void simple_connection_close(SimpleConnection* self) {
-    puts("simple_connection_close begin");
+    ASSERT(self->sock > 0, "input fd invalid, fd:%d", self->sock);
+    ASSERT_NOT_NULL(self->thread);
     if (self->handler->dis_conn != NULL) {
         self->handler->dis_conn(self);
     }
     // TODO
-    puts("simple_connection_close end");
+    close(self->sock);
 }
 
 // ---------------------------------------------------
 
 int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
-    puts("simple_connection_read begin");
     SimpleConnection* self = (SimpleConnection*) user_data;
+    ASSERT(self->sock > 0, "input fd invalid, fd:%d", self->sock);
+    ASSERT_NOT_NULL(self->thread);
     // TODO 怎么知道要读多少数据呢？
     // 比如一个结构，因为用户才知道要读多少数据，所以这里应该嵌入用户的逻辑
     // 代码，所以这里应该调用handler的decode方法。
@@ -139,13 +156,12 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     } else {
         simple_connection_close(self);
     }
-    puts("simple_connection_read end");
     return AE_NOMORE;
 }
 
 int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) {
-    puts("simple_connection_write begin");
     SimpleConnection* self = (SimpleConnection*) user_data;
+    printf("fd: %d, sock: %d, ptr: %p, mask:%d \n", fd, self->sock, user_data, mask);
 
     // new_packet
     if (self->handler->new_packet != NULL) {
@@ -155,7 +171,11 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
     void* data = simple_message_get_pull_ptr(self->out);
     int size = simple_message_size(self->out);
 
-    // TODO 考虑是否需要坚持size ？
+    if (size <=0 ) {
+        return AE_NOMORE;
+    }
+
+    // TODO 考虑是否需要检查size ？
 
     // 读取发送队列中的数据，将数据发送出去，同理，也只调用一次write
     // TODO 为了开发简单，仅仅调用一次write，后面重构
@@ -177,18 +197,29 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
     } else {
         simple_connection_close(self);
     }
-    puts("simple_connection_write end");
     return AE_NOMORE;
 }
 
 SimpleIOThread* simple_connection_get_thread(SimpleConnection* self) {
+    ASSERT(self->sock > 0, "input fd invalid, fd:%d", self->sock);
+    ASSERT_NOT_NULL(self->thread);
     return self->thread;
 }
 
 SimpleMessage* simple_connection_get_in(SimpleConnection* self) {
+    ASSERT(self->sock > 0, "input fd invalid, fd:%d", self->sock);
+    ASSERT_NOT_NULL(self->thread);
     return self->in;
 }
 
 SimpleMessage* simple_connection_get_out(SimpleConnection* self) {
+    ASSERT(self->sock > 0, "input fd invalid, fd:%d", self->sock);
+    ASSERT_NOT_NULL(self->thread);
     return self->out;
+}
+
+int simple_connection_get_fd(SimpleConnection* self) {
+    ASSERT(self->sock > 0, "input fd invalid, fd:%d", self->sock);
+    ASSERT_NOT_NULL(self->thread);
+    return self->sock;
 }

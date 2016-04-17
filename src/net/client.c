@@ -2,6 +2,8 @@
 
 #include "net/connection.h"
 
+#include "assert.h"
+
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -63,7 +65,8 @@ int simple_client_connect(SimpleClient* self) {
     int conn_fd = socket(AF_INET, SOCK_STREAM, 0);
     
     // TODO check succ
-    connect(conn_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    int ret = connect(conn_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    ASSERT(ret == 0, "connect the remote address fail !");
 
     SimpleConnection* conn = simple_connection_create(
             self->threads[self->index], 
@@ -71,6 +74,10 @@ int simple_client_connect(SimpleClient* self) {
             self->handler);
 
     simple_connection_establish(conn);
+
+    if (++(self->index) >= self->config.io_thread_count ) {
+        self->index = 0;
+    }
 
     return 0;
 }

@@ -32,4 +32,5 @@ SimpleMessage* simple_connection_get_in(SimpleConnection* self);
 
 SimpleMessage* simple_connection_get_out(SimpleConnection* self);
 
+int simple_connection_get_fd(SimpleConnection* self);
 #endif

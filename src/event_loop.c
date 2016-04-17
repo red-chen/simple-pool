@@ -11,13 +11,13 @@
 
 typedef struct epoll_state_t {
     int epfd;
-    struct epoll_event *events;
+    struct epoll_event* events;
 } EpollState;
 
 static int api_epoll_create(EventLoop* loop) {
     EpollState* self = malloc(sizeof(EpollState));
 
-    self->events = malloc(sizeof(struct epoll_event));
+    self->events = malloc(sizeof(struct epoll_event) * loop->set_size);
 
     self->epfd = epoll_create(1024);/* 1024 is just an hint for the kernel */
     if (self->epfd == -1) {
@@ -149,6 +149,7 @@ EventLoop* event_loop_create(int set_size) {
     self->max_fd = -1;
     self->before = NULL;
     self->after = NULL;
+
     if (api_epoll_create(self) == -1) {
         goto error;
     }

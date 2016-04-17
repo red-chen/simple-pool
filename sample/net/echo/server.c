@@ -43,7 +43,7 @@ int main() {
 
     // 初始化配置
     SimpleServerConfig conf;
-    conf.io_thread_count = 2;
+    conf.io_thread_count = 1;
 
     SimpleServer* s = simple_server_create(11233, &handler, &conf);
 
@@ -62,29 +62,28 @@ int main() {
 
 // ----------------------------------------------------------------
 int handle_new_conn(SimpleConnection* c) {
-    printf("new connection\n");
     return AE_OK;
 }
 
 void* handle_decode(SimpleMessage* m) {
-    printf("handle_decode\n");
-    printf("data:%s\n", (char*)simple_message_get_pull_ptr(m));
     return simple_message_get_pull_ptr(m);
 }
 
 int handle_encode(SimpleConnection* c, void* data) {
-    printf("handle_encode\n");
     SimpleMessage* out = simple_connection_get_out(c);
     simple_message_add(out, data, strlen(data) + 1);
-    printf("handle_encode end\n");
     return AE_OK;
 }
 
 int handle_process(SimpleConnection* c) {
-    printf("handle_process\n");
     SimpleIOThread* t = simple_connection_get_thread(c);
-    printf("use io thread: %s \n", simple_io_thread_get_name(t));
     SimpleMessage* in = simple_connection_get_in(c);
+
+    printf("fd: %d, data: %s, use io thread: %s \n", 
+            simple_connection_get_fd(c),
+            (char*)simple_message_get(in), 
+            (char*)simple_io_thread_get_name(t));
+
     simple_connection_send(c, simple_message_get(in));
     return AE_OK;
 }

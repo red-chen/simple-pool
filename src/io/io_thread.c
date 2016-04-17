@@ -1,6 +1,7 @@
 #include "io/io_thread.h"
 
 #include "event_loop.h"
+#include "assert.h"
 
 #include <stdio.h>
 #include <stdlib.h>
