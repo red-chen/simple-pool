@@ -41,8 +41,8 @@ static int handle_process(SimpleConnection* c);
 
 static int count = 0;
 static int result = 0;
-static int limit = 4;
-static int io_count = 1;
+static int limit = 10;
+static int io_count = 3;
 
 int main() {
     // 设置信号处理
@@ -86,7 +86,7 @@ int main() {
 int handle_new_packet(SimpleConnection* c) {
     SimpleIOThread* t = simple_connection_get_thread(c);
     ASSERT_NOT_NULL(t);
-    if (count > 10) {
+    if (count > limit) {
         return AE_OK;   
     }
 
