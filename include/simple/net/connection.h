@@ -3,7 +3,7 @@
 
 #include "define.h"
 
-#include "io/io_thread.h"
+#include "io_thread.h"
 /**
  *  创建连接，绑定sock和IO线程
  */

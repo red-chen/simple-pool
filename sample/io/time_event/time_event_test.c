@@ -1,4 +1,4 @@
-#include <simple/io/io_thread.h>
+#include <simple/io_thread.h>
 #include <simple/timestamp.h>
 
 #include <stdbool.h>

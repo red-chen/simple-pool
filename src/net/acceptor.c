@@ -1,6 +1,6 @@
 #include "net/acceptor.h"
 
-#include "io/io_thread.h"
+#include "io_thread.h"
 #include "assert.h"
 
 #include <sys/epoll.h>

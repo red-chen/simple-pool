@@ -7,7 +7,7 @@
  *  telnet 127.0.0.1 11233
  *
  */
-#include <simple/io/io_thread.h>
+#include <simple/io_thread.h>
 
 #include <sys/epoll.h>
 #include <sys/socket.h>

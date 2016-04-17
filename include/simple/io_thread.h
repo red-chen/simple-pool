@@ -10,7 +10,7 @@
 #ifndef SIMPLE_IO_THREAD_H_
 #define SIMPLE_IO_THREAD_H_
 
-#include "../event_loop.h"
+#include "event_loop.h"
 
 #include <pthread.h>
 #include <stdbool.h>

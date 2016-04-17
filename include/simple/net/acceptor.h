@@ -3,7 +3,7 @@
 
 #include "define.h"
 
-#include "io/io_thread.h"
+#include "io_thread.h"
 
 SimpleAcceptor* simple_acceptor_create(
         int port, 
