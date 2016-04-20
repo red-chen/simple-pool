@@ -1,11 +1,14 @@
 #ifndef SIMPLE_NET_DEFINE_H
 #define SIMPLE_NET_DEFINE_H
 
+#include <arpa/inet.h>
+
 // ----------------------------------------------
 // 基础对象声明
 // ----------------------------------------------
 
 typedef struct simple_client_t SimpleClient;
+typedef struct simple_address_t SimpleAddress;
 typedef struct simple_server_t SimpleServer;
 typedef struct simple_acceptor_t SimpleAcceptor;
 typedef struct simple_connection_t SimpleConnection;
@@ -85,10 +88,10 @@ typedef struct simple_handler_t {
     void* user_data;
 } SimpleHandler;
 
-typedef struct simple_address_t {
-    // TODO
-} SimpleAddress;
-
-typedef void SimpleNewConnection(void* user_data, int sock);
+typedef void SimpleNewConnection(
+        void* user_data, 
+        int sock, 
+        SimpleAddress* client,
+        SimpleAddress* server);
 
 #endif

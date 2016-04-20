@@ -1,5 +1,6 @@
 #include "net/client.h"
 
+#include "net/address.h"
 #include "net/connection.h"
 
 #include "assert.h"
@@ -18,9 +19,8 @@
 #include <signal.h>
 
 struct simple_client_t {
-    char host[64];
-    int port;
     int index;
+    SimpleAddress* addr;
     SimpleHandler* handler;
     SimpleClientConfig config;
     SimpleIOThread** threads;
@@ -29,13 +29,11 @@ struct simple_client_t {
 static void simple_client_init_config(SimpleClientConfig* input, SimpleClientConfig* out);
 
 SimpleClient* simple_client_create(
-        const char* host, 
-        int port, 
+        SimpleAddress* addr,
         SimpleHandler* handler, 
         SimpleClientConfig* config) {
     SimpleClient* self = malloc(sizeof(SimpleClient));
-    strcpy(self->host, host);
-    self->port = port;
+    self->addr = addr;
     self->handler = handler;
     simple_client_init_config(config, &(self->config));
     self->index = 0;
@@ -57,24 +55,51 @@ void simple_client_destroy(SimpleClient* self) {
 }
 
 int simple_client_connect(SimpleClient* self) {
-    // 
-    struct sockaddr_in server_addr, client_addr;
-    bzero(&server_addr, sizeof(server_addr));
-    bzero(&client_addr, sizeof(client_addr));
+    int conn_fd = 0;
+    SimpleAddress* client = NULL;
+    SimpleAddress* server = NULL;
+    if (AF_INET == simple_address_get_family(self->addr)) {
+        struct sockaddr_in server_addr, client_addr;
+        socklen_t addr_len = sizeof(server_addr);
+        bzero(&server_addr, sizeof(server_addr));
 
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(self->host);
-    server_addr.sin_port = htons(self->port);
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_addr.s_addr = inet_addr(simple_address_get_addr(self->addr));
+        server_addr.sin_port = htons(simple_address_get_port(self->addr));
 
-    int conn_fd = socket(AF_INET, SOCK_STREAM, 0);
-    
-    int ret = connect(conn_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
-    ASSERT(ret == 0, "connect the remote address fail !");
+        conn_fd = socket(AF_INET, SOCK_STREAM, 0);
+        
+        int ret = connect(
+                conn_fd, 
+                (struct sockaddr*)&server_addr, 
+                addr_len);
+
+        ASSERT(ret == 0, "connect the remote address fail !");
+  
+        getsockname(conn_fd, (struct sockaddr*)&client_addr, &addr_len); 
+
+        client = simple_address_create_inet(
+                inet_ntoa(client_addr.sin_addr), // TODO 处理内存释放的问题
+                ntohs(client_addr.sin_port));
+
+        server = simple_address_create_inet(
+                inet_ntoa(server_addr.sin_addr), // TODO 处理内存释放的问题
+                ntohs(server_addr.sin_port));
+
+    } else if (AF_INET6 == simple_address_get_family(self->addr)) {
+        ASSERT(false, "not implement");
+    } else if (AF_UNIX == simple_address_get_family(self->addr)) {
+        ASSERT(false, "not implement");
+    } else {
+        ASSERT(false, "not support");
+    }
 
     SimpleConnection* conn = simple_connection_create(
             self->threads[self->index], 
             conn_fd, 
-            self->handler);
+            self->handler, 
+            client,
+            server);
 
     simple_connection_establish(conn);
 

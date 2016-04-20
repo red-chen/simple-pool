@@ -10,7 +10,9 @@
 SimpleConnection* simple_connection_create(
         SimpleIOThread* thread, 
         int sock, 
-        SimpleHandler* handler);
+        SimpleHandler* handler,
+        SimpleAddress* client,
+        SimpleAddress* server);
 
 /**
  * 构建连接
@@ -33,4 +35,9 @@ SimpleMessage* simple_connection_get_in(SimpleConnection* self);
 SimpleMessage* simple_connection_get_out(SimpleConnection* self);
 
 int simple_connection_get_fd(SimpleConnection* self);
+
+SimpleAddress* simple_connection_get_client(SimpleConnection* self);
+
+SimpleAddress* simple_connection_get_server(SimpleConnection* self);
+
 #endif

@@ -29,13 +29,12 @@ typedef struct simple_server_config_t {
  * 创建服务器
  *
  * 参数
- *     port 需要监听的端口
+ *     addr 需要监听的地址
  *     handler 对应状态的处理函数
  *     config 服务器启动的相关配置，可以传入NULL
  */
-// TODO 这里port可以抽象为一个Address的对象，Address对象接收端口或者domain socket的路径
 SimpleServer* simple_server_create(
-        int port, 
+        SimpleAddress* addr, 
         SimpleHandler* handler, 
         SimpleServerConfig* config);
 

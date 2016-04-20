@@ -16,8 +16,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define SIMPLE_READ_BUF_SIZE 16 * 1024 //
-
 struct simple_connection_t {
     int sock;
     SimpleIOThread* thread; 
@@ -25,12 +23,18 @@ struct simple_connection_t {
 
     // 存储接收到的数据
     SimpleMessage* in; 
+    // TODO 暂时还未使用
     // 当数据满足大小需要时，就将message中的数据构建了一个对象
     void* in_data; 
     // 存储将要发送的数据
     SimpleMessage* out;
-    // 存储用户写入数据的指针，系统之后会调用encode函数，将数据写入out message中
+    // TODO 暂时还未使用
+    // 存储用户写入数据的指针，系统之后会调用encode函数，将数据
+    // 写入out message中
     void* out_data;
+
+    SimpleAddress* client;
+    SimpleAddress* server;
 };
 
 static int simple_connection_read(
@@ -48,15 +52,17 @@ static int simple_connection_write(
 SimpleConnection* simple_connection_create(
         SimpleIOThread* thread, 
         int sock, 
-        SimpleHandler* handler) {
-    ASSERT(sock > 0, "input fd invalid, fd:%d", sock);
-
+        SimpleHandler* handler,
+        SimpleAddress* client,
+        SimpleAddress* server) {
     SimpleConnection* self = malloc(sizeof(SimpleConnection));
     self->sock = sock;
     self->thread = thread;
     self->handler = handler;
     self->in = simple_message_create();
     self->out = simple_message_create();
+    self->client = client;
+    self->server = server;
     return self;
 }
 
@@ -125,13 +131,17 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     // 的内容
     
     // NOTE 为什么每次只调用一次read呢？
-    // 因为我们的Buffer接收大小默认开启为16KB，单次足够满足大多数的请求需要，为了
-    // 不让某个大请求持续的占用线程，所以不能持续读取数据
+    // 因为我们的Buffer单次足够满足大多数的请求需要，为了不让某个大请求持续的占
+    // 用线程，所以不能持续读取数据
 
-    // TODO Buffer大小可以动态设置, 考虑Buffer动态在堆上分配或者编译决定大小
-  
-    void* buffer = simple_message_get_push_ptr(self->in, SIMPLE_READ_BUF_SIZE);
-    int n = read(fd, buffer, SIMPLE_READ_BUF_SIZE);
+    int free = simple_message_get_free_size(self->in);
+    if (free <= 0) {
+        return AE_AGAIN;
+    }
+
+    void* buffer = simple_message_get_push_ptr(self->in, free);
+    int n = read(fd, buffer, free);
+    // TODO 检查N的值，并根据N来确定某些行为
     if (n > 0) {
         simple_message_set_push_size(self->in, n);
         // build request
@@ -198,4 +208,12 @@ SimpleMessage* simple_connection_get_out(SimpleConnection* self) {
 
 int simple_connection_get_fd(SimpleConnection* self) {
     return self->sock;
+}
+
+SimpleAddress* simple_connection_get_client(SimpleConnection* self) {
+    return self->client;
+}
+
+SimpleAddress* simple_connection_get_server(SimpleConnection* self) {
+    return self->server;
 }

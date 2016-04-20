@@ -14,6 +14,7 @@
 #include <simple/net/message.h>
 #include <simple/net/client.h>
 #include <simple/net/connection.h>
+#include <simple/net/address.h>
 
 #include <simple/atomic.h>
 #include <simple/assert.h>
@@ -34,6 +35,7 @@ static void handle_sig(int sig) {
     RUNNING = false;
 }
 
+static int handle_new_conn(SimpleConnection* c);
 static int handle_new_packet(SimpleConnection* c);
 static void* handle_decode(SimpleMessage* m);
 static int handle_encode(SimpleConnection* c, void* data);
@@ -53,6 +55,7 @@ int main() {
     SimpleHandler handler;
     bzero(&handler, sizeof(SimpleHandler));
 
+    handler.new_conn = handle_new_conn;
     handler.new_packet = handle_new_packet;
     handler.decode = handle_decode;
     handler.encode = handle_encode;
@@ -62,7 +65,8 @@ int main() {
     SimpleClientConfig conf;
     conf.io_thread_count = io_count;
 
-    SimpleClient* s = simple_client_create("127.0.0.1", 11233, &handler, &conf);
+    SimpleAddress* a = simple_address_create_inet("127.0.0.1", 11233);
+    SimpleClient* s = simple_client_create(a, &handler, &conf);
 
     for (int i = 0; i < limit; i++) {
         simple_client_connect(s);
@@ -77,11 +81,25 @@ int main() {
     simple_client_stop(s);
     simple_client_wait(s);
     simple_client_destroy(s);
-
+    simple_address_destroy(a);
     return 0;
 }
 
 // ----------------------------------------------------------------
+
+int handle_new_conn(SimpleConnection* c) {
+    SimpleAddress* r = simple_connection_get_server(c);
+    SimpleAddress* l = simple_connection_get_client(c);
+
+    printf("new connection [%s:%d --> %s:%d], fd: %d \n", 
+            simple_address_get_addr(l),
+            simple_address_get_port(l),
+            simple_address_get_addr(r),
+            simple_address_get_port(r),
+            simple_connection_get_fd(c));
+
+    return AE_OK;
+}
 
 int handle_new_packet(SimpleConnection* c) {
     SimpleIOThread* t = simple_connection_get_thread(c);

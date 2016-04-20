@@ -1,4 +1,5 @@
 #include <simple/net/define.h>
+#include <simple/net/address.h>
 #include <simple/net/message.h>
 #include <simple/net/server.h>
 #include <simple/net/connection.h>
@@ -43,9 +44,11 @@ int main() {
 
     // 初始化配置
     SimpleServerConfig conf;
-    conf.io_thread_count = 1;
+    conf.io_thread_count = 4;
 
-    SimpleServer* s = simple_server_create(11233, &handler, &conf);
+    SimpleAddress* a = simple_address_create_inet(NULL, 11233);
+
+    SimpleServer* s = simple_server_create(a, &handler, &conf);
 
     simple_server_start(s);
 
@@ -56,23 +59,37 @@ int main() {
     simple_server_stop(s);
     simple_server_wait(s);
     simple_server_destroy(s);
-
+    simple_address_destroy(a);
     return 0;
 }
 
 // ----------------------------------------------------------------
 int handle_new_conn(SimpleConnection* c) {
+    SimpleAddress* r = simple_connection_get_client(c);
+    SimpleAddress* l = simple_connection_get_server(c);
+
+    printf("new connection [%s:%d --> %s:%d], fd: %d \n", 
+            simple_address_get_addr(r),
+            simple_address_get_port(r),
+            simple_address_get_addr(l),
+            simple_address_get_port(l),
+            simple_connection_get_fd(c));
     return AE_OK;
 }
 
 void* handle_decode(SimpleMessage* m) {
-    return simple_message_get_pull_ptr(m);
-}
+    // NOTE 比如我们的接收缓冲区只有4KB，但是有4M的数据要发送过来，这时
+    // 我们需要从Connection的MemoryPool中申请一段内存，用于存储大量的数据。
+    // 这段内存的释放，用户不用关心，当单次请求响应完成之后，系统会主动释
+    // 放内存空间。
 
-int handle_encode(SimpleConnection* c, void* data) {
-    SimpleMessage* out = simple_connection_get_out(c);
-    simple_message_add(out, data, strlen(data) + 1);
-    return AE_OK;
+    // NOTE 我们的数据是流式的数据，比如单个包是1KB，一共要发送1024个包，我
+    // 们不想等待所有的包发送完毕之后再处理，比如，一旦一个完整的包达到，我
+    // 们就可以处理一个包，这里应该怎么办？
+    // 针对于这种情况，建议用户自己在decode函数中判断一个包是否完成，如果包
+    // 已经构建好，那么可以将这个包发送到一个队里中，或者一旦接到一部分数据
+    // 将这个数据写入一个stream钟，下游线程从队列或者stream中获取数据处理。
+    return simple_message_get_pull_ptr(m);
 }
 
 int handle_process(SimpleConnection* c) {
@@ -88,5 +105,10 @@ int handle_process(SimpleConnection* c) {
     return AE_OK;
 }
 
+int handle_encode(SimpleConnection* c, void* data) {
+    SimpleMessage* out = simple_connection_get_out(c);
+    simple_message_add(out, data, strlen(data) + 1);
+    return AE_OK;
+}
 
 

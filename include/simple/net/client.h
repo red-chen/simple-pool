@@ -15,8 +15,7 @@ typedef struct simple_client_config_t {
 } SimpleClientConfig;
 
 SimpleClient* simple_client_create(
-        const char* host,
-        int port, 
+        SimpleAddress* addr,
         SimpleHandler* handler, 
         SimpleClientConfig* config);
 

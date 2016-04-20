@@ -6,7 +6,7 @@
 #include "io_thread.h"
 
 SimpleAcceptor* simple_acceptor_create(
-        int port, 
+        SimpleAddress* addr, 
         SimpleNewConnection* cb, 
         void* user_data,
         SimpleIOThread* thread);

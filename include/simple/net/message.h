@@ -59,4 +59,5 @@ int simple_message_add(SimpleMessage* self, void* data, int size);
 
 void* simple_message_get(SimpleMessage* self);
 
+int simple_message_get_free_size(SimpleMessage* self);
 #endif
