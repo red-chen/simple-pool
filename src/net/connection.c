@@ -173,6 +173,11 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
     }
 
     // NOTE 读取发送队列中的数据，将数据发送出去，同理，也只调用一次write
+    // NOTE UNIX网络编程卷1: 套接字联网API，第2.11.1章 TCP输出
+    // socket只是将用户缓存的数据拷贝到TCP发送缓存，n只是表示写入TCP发送
+    // 缓存的字节个数，所以数据是否真正的发送到对端，通过判断write的返回
+    // 值是办不到的。
+    // 如果是阻塞的写入，当发送缓冲区满时，写入函数将被阻塞。
     int n = write(fd, data, size);
 
     if (n > 0) {
