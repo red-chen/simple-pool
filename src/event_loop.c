@@ -9,6 +9,11 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define AE_FILE_EVENTS  1
+#define AE_TIME_EVENTS  2
+#define AE_ALL_EVENTS   (AE_FILE_EVENTS|AE_TIME_EVENTS)
+#define AE_DONT_WAIT    4
+
 typedef struct epoll_state_t {
     int epfd;
     struct epoll_event* events;
@@ -352,13 +357,13 @@ int event_loop_proccess_events(EventLoop* loop, int flags) {
     int processed = 0, num_events;
 
     /* Nothing to do? return ASAP */
-    if (!(flags & SE_TIME_EVENTS) && !(flags & SE_FILE_EVENTS)) {
+    if (!(flags & AE_TIME_EVENTS) && !(flags & AE_FILE_EVENTS)) {
         return 0;
     }
-    if (loop->max_fd != -1 || ((flags & SE_TIME_EVENTS) && !(flags & SE_DONT_WAIT))) {
+    if (loop->max_fd != -1 || ((flags & AE_TIME_EVENTS) && !(flags & AE_DONT_WAIT))) {
         TimeEvent* shortest = NULL;
         struct timeval tv, *tvp;
-        if ((flags & SE_TIME_EVENTS) && !(flags & SE_DONT_WAIT)) {
+        if ((flags & AE_TIME_EVENTS) && !(flags & AE_DONT_WAIT)) {
             shortest = search_nearest_timer(loop);
         }
         if (shortest) {
@@ -381,9 +386,9 @@ int event_loop_proccess_events(EventLoop* loop, int flags) {
             }
         } else {
             /* If we have to check for events but need to return
-             * ASAP because of SE_DONT_WAIT we need to set the timeout
+             * ASAP because of AE_DONT_WAIT we need to set the timeout
              * to zero */
-            if (flags & SE_DONT_WAIT) {
+            if (flags & AE_DONT_WAIT) {
                 tv.tv_sec = tv.tv_usec = 0;
                 tvp = &tv;
             } else {
@@ -420,7 +425,7 @@ int event_loop_proccess_events(EventLoop* loop, int flags) {
         }
     }
     /* Check time events */
-    if (flags & SE_TIME_EVENTS) {
+    if (flags & AE_TIME_EVENTS) {
         processed += process_time_events(loop);
     }
     return processed;
@@ -432,7 +437,7 @@ void event_loop_run(EventLoop* loop) {
         if (loop->before != NULL) {
             loop->before(loop);
         }
-        event_loop_proccess_events(loop, SE_ALL_EVENTS);
+        event_loop_proccess_events(loop, AE_ALL_EVENTS);
         if (loop->after != NULL) {
             loop->after(loop);
         }
