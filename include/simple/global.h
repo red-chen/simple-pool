@@ -11,9 +11,4 @@
 #define SE_READABLE     1
 #define SE_WRITABLE     2
 
-#define SE_FILE_EVENTS  1
-#define SE_TIME_EVENTS  2
-#define SE_ALL_EVENTS   (SE_FILE_EVENTS|SE_TIME_EVENTS)
-#define SE_DONT_WAIT    4
-
 #endif
