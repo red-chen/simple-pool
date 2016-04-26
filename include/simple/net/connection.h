@@ -4,9 +4,8 @@
 #include "define.h"
 
 #include "io_thread.h"
-/**
- *  创建连接，绑定sock和IO线程
- */
+#include "timestamp.h"
+
 SimpleConnection* simple_connection_create(
         SimpleIOThread* thread, 
         int sock, 
@@ -14,16 +13,8 @@ SimpleConnection* simple_connection_create(
         SimpleAddress* client,
         SimpleAddress* server);
 
-/**
- * 构建连接
- *
- * 并注册可读事件
- */
 void simple_connection_establish(SimpleConnection* self);
 
-/**
- * 发送数据
- */
 int simple_connection_send(SimpleConnection* self, void* data);
 
 void simple_connection_close(SimpleConnection* self);
@@ -39,5 +30,7 @@ int simple_connection_get_fd(SimpleConnection* self);
 SimpleAddress* simple_connection_get_client(SimpleConnection* self);
 
 SimpleAddress* simple_connection_get_server(SimpleConnection* self);
+
+TIME_IN_MICRO simple_connection_get_create_time(SimpleConnection* self);
 
 #endif

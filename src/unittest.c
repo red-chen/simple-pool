@@ -120,7 +120,7 @@ int simple_unittest_suite_cleanup(const char* suite_name, CleanupFunc func)
     return ret;
 }
 
-#define ADD_TESTCASE_TO_SUITE(test_case_list, test_case) \
+#define ADD_TESTCAAE_TO_SUITE(test_case_list, test_case) \
     if(test_case_list == NULL) {\
         test_case_list = test_case;\
     }else{\
@@ -147,7 +147,7 @@ int simple_unittest_suite_add_testcase(const char* suite_name, const char* case_
             tc->func = func;
             tc->status = 0;
 
-            ADD_TESTCASE_TO_SUITE(index->cases, tc);
+            ADD_TESTCAAE_TO_SUITE(index->cases, tc);
 
             ret = 1;
             testInst->total_case++;

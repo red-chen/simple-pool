@@ -32,11 +32,13 @@ typedef struct simple_server_config_t {
  *     addr 需要监听的地址
  *     handler 对应状态的处理函数
  *     config 服务器启动的相关配置，可以传入NULL
+ *     name 服务器名称，可以传入NULL，最多支持63个字节
  */
 SimpleServer* simple_server_create(
         SimpleAddress* addr, 
         SimpleHandler* handler, 
-        SimpleServerConfig* config);
+        SimpleServerConfig* config,
+        const char* name);
 
 /**
  * 启动服务器
@@ -57,5 +59,7 @@ void simple_server_wait(SimpleServer* self);
  * 销毁服务器
  */
 void simple_server_destroy(SimpleServer* self);
+
+const char* simple_server_name(SimpleServer* self);
 
 #endif

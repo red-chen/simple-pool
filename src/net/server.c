@@ -14,13 +14,18 @@ struct simple_server_t {
     SimpleHandler* handler;
     SimpleServerConfig config;
     SimpleIOThread** threads;
+    char name[64];
 };
 
 static void simple_server_init_config(SimpleServerConfig* input, SimpleServerConfig* out);
 
 static void simple_server_new_conn_cb(void* user_data, int conn_fd, SimpleAddress* r, SimpleAddress* l); 
 
-SimpleServer* simple_server_create(SimpleAddress* addr, SimpleHandler* handler, SimpleServerConfig* config) {
+SimpleServer* simple_server_create(
+        SimpleAddress* addr, 
+        SimpleHandler* handler, 
+        SimpleServerConfig* config,
+        const char* name) {
     SimpleServer* self = malloc(sizeof(SimpleServer));
     self->addr = addr;
     self->handler = handler;
@@ -31,6 +36,9 @@ SimpleServer* simple_server_create(SimpleAddress* addr, SimpleHandler* handler, 
         char name[64] = {0};
         sprintf(name, "server_t_%d", i);
         self->threads[i] = simple_io_thread_create(name);
+    }
+    if (name != NULL) {
+        strcpy(self->name, name);
     }
     return self;
 }

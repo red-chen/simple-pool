@@ -40,11 +40,11 @@ int handle_write(EventLoop* loop, int fd, void* user_data, int mask) {
     int n = write(fd, buffer, strlen(buffer) + 1);
     if (n > 0) {
         printf("write:%s\n", buffer);
-        event_loop_add_file_event(loop, fd, SE_READABLE, handle_read, buffer);    
+        event_loop_add_file_event(loop, fd, AE_READABLE, handle_read, buffer);    
     } else {
         close(fd);
     }
-    return SE_NOMORE;
+    return AE_NOMORE;
 }
 
 // Implement file func
@@ -53,15 +53,15 @@ int handle_read(EventLoop* loop, int fd, void* user_data, int mask) {
     int n = read(fd, buffer, 1024);
     if (n > 0) {
         printf("read:%s\n", buffer);
-        event_loop_add_file_event(loop, fd, SE_WRITABLE, handle_write, buffer);    
+        event_loop_add_file_event(loop, fd, AE_WRITABLE, handle_write, buffer);    
     } else {
         close(fd);
     }
     // 思考：如果Read的数据不完整怎么办？
-    // loop提供了SE_AGAIN选项，所以可以将这个选项返回。对于真实的应用场景，这里应该在封装一层，因为
+    // loop提供了AE_AGAIN选项，所以可以将这个选项返回。对于真实的应用场景，这里应该在封装一层，因为
     // 数据还没有收集完整，buffer也不能交给下游，所以应该封装一个‘Session’和fd绑定，生存周期也和fd一致。
     // Session内部创建Request和Response，当单次的读数据完整之后，拼装一个Request，交给下游。
-    return SE_NOMORE;
+    return AE_NOMORE;
 }
 
 // Implement file func
@@ -73,8 +73,8 @@ int handle_connect(EventLoop* loop, int listen_fd, void* user_data, int mask) {
     // 思考：如果我们要实现多线程这里应该怎么处理？
     // 如例子所示，一个IO线程专门用户新连接的接收，可以吧线程池放入user_data中，这里可以顺序选择线程池中的
     // 线程。比如，线程池中维护一个IO线程的列表，每个连接被建立，每次都选取一个连接，并将连接绑定到IO线程上。
-    event_loop_add_file_event(loop, conn_fd, SE_READABLE, handle_read, user_data);    
-    return SE_AGAIN;
+    event_loop_add_file_event(loop, conn_fd, AE_READABLE, handle_read, user_data);    
+    return AE_AGAIN;
 }
 
 int main() {
@@ -97,7 +97,7 @@ int main() {
     listen(fd, 1024);
 
     // 将fd注册到io thread中
-    simple_io_thread_add_file_event(t, fd, SE_READABLE, handle_connect, "handle connect");
+    simple_io_thread_add_file_event(t, fd, AE_READABLE, handle_connect, "handle connect");
 
     simple_io_thread_start(t);
 

@@ -4,6 +4,7 @@
 #include "io_thread.h"
 #include "event_loop.h"
 #include "assert.h"
+#include "timestamp.h"
 
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -35,6 +36,9 @@ struct simple_connection_t {
 
     SimpleAddress* client;
     SimpleAddress* server;
+
+    // 连接创建时间
+    TIME_IN_MICRO create_in_micro;
 };
 
 static int simple_connection_read(
@@ -63,6 +67,7 @@ SimpleConnection* simple_connection_create(
     self->out = simple_message_create();
     self->client = client;
     self->server = server;
+    self->create_in_micro = simple_real_time_now();
     return self;
 }
 
@@ -87,7 +92,7 @@ void simple_connection_establish(SimpleConnection* self) {
     simple_io_thread_add_file_event(
         self->thread,
         self->sock,
-        SE_READABLE,
+        AE_READABLE,
         simple_connection_read,
         self
     );
@@ -95,7 +100,7 @@ void simple_connection_establish(SimpleConnection* self) {
     simple_io_thread_add_file_event(
         self->thread,
         self->sock,
-        SE_WRITABLE,
+        AE_WRITABLE,
         simple_connection_write,
         self
     );
@@ -110,12 +115,12 @@ int simple_connection_send(SimpleConnection* self, void* data) {
     simple_io_thread_add_file_event(
         self->thread,
         self->sock,
-        SE_WRITABLE,
+        AE_WRITABLE,
         simple_connection_write,
         self
     );
 
-    return SE_OK;
+    return 0;
 }
 
 // ---------------------------------------------------
@@ -136,7 +141,8 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
 
     int free = simple_message_get_free_size(self->in);
     if (free <= 0) {
-        return SE_AGAIN;
+        // TODO busy, add counter
+        return AE_AGAIN;
     }
 
     void* buffer = simple_message_get_push_ptr(self->in, free);
@@ -147,13 +153,13 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
         // build request
         void* data = self->handler->decode(self->in);
         if (data == NULL) {
-            return SE_AGAIN;
+            return AE_AGAIN;
         }
         self->handler->process(self);
     } else {
         simple_connection_close(self);
     }
-    return SE_NOMORE;
+    return AE_NOMORE;
 }
 
 int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) {
@@ -169,7 +175,7 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
 
     // TODO 考虑是否需要检查size ?
     if (size <= 0 ) {
-        return SE_NOMORE;
+        return AE_NOMORE;
     }
 
     // NOTE 读取发送队列中的数据，将数据发送出去，同理，也只调用一次write
@@ -185,18 +191,18 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
             simple_io_thread_add_file_event(
                 self->thread,
                 self->sock,
-                SE_READABLE,
+                AE_READABLE,
                 simple_connection_read,
                 self
             );
         } else {
             simple_message_set_pull_size(self->out, n);
-            return SE_AGAIN;
+            return AE_AGAIN;
         }
     } else {
         simple_connection_close(self);
     }
-    return SE_NOMORE;
+    return AE_NOMORE;
 }
 
 SimpleIOThread* simple_connection_get_thread(SimpleConnection* self) {
@@ -221,4 +227,8 @@ SimpleAddress* simple_connection_get_client(SimpleConnection* self) {
 
 SimpleAddress* simple_connection_get_server(SimpleConnection* self) {
     return self->server;
+}
+
+TIME_IN_MICRO simple_connection_get_create_time(SimpleConnection* self) {
+    return self->create_in_micro;
 }

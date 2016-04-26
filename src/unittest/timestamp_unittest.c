@@ -18,7 +18,7 @@ void test_simple_timestamp_to_iso8601()
     TIME_IN_MICRO ts = 1448776474450749;
     char buffer[128] = {0};
     simple_timestamp_to_iso8601(ts, buffer);
-    TEST_EQUAL_STRING("2015-11-29T13:54:34.450+08", (char*)buffer);
+    TEST_EQUAL_STRING("2015-11-29T13:54:34.450749+08", (char*)buffer);
 }
 
 UNITTEST_REGISTER();

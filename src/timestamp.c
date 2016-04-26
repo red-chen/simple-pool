@@ -23,14 +23,14 @@ TIME_IN_MICRO simple_real_time_now()
 void simple_timestamp_to_iso8601(TIME_IN_MICRO ts, /*out*/char out[])
 {
     time_t now = ts / MICRO_PER_SEC;
-    TIME_IN_MILLI milli = (ts - now * MICRO_PER_SEC) / 1000;
+    TIME_IN_MICRO micro = (ts - now * MICRO_PER_SEC);
     char time_str[65] = {0};
     char zone_str[10] = {0};
     strftime(time_str, 64, "%Y-%m-%dT%H:%M:%S", localtime(&now));
     strftime(zone_str, 10, "%z", localtime(&now));
     char short_zone[4] = {0};
     strncpy(short_zone, zone_str, 3);
-    sprintf(out, "%s.%03d%s", time_str, (int)milli, short_zone);    
+    sprintf(out, "%s.%06d%s", time_str, (int)micro, short_zone);    
 }
 
 void simple_now_iso8601(/*out*/char out[])

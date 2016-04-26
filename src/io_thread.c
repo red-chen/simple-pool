@@ -22,7 +22,7 @@ struct simple_io_thread_t {
 static int64_t check_thread_running(EventLoop* loop, int64_t id, void* user_data) {
     SimpleIOThread* self = (SimpleIOThread*)user_data;
     if (!self->running) { // 当线程被停止掉，表示不再check，那么返回-1
-        return SE_NOMORE;
+        return AE_NOMORE;
     }
 
     // 返回下一次要检测的时间间隔

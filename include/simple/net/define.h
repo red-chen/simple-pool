@@ -22,7 +22,6 @@ typedef int SimpleNewConn(SimpleConnection* c);
 typedef int SimpleDisConn(SimpleConnection* c);
 typedef int SimpleIdleConn(SimpleConnection* c);
 
-
 /**
  * @brief 新的数据包发送函数
  * 对于Client端来说，当连接可写时，将数据发送给服务器。

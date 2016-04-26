@@ -41,14 +41,14 @@ static int api_epoll_add_event(EventLoop* loop, int fd, int mask) {
      * operation. Otherwise we need an ADD operation. */
     // EPOLL_CTL_ADD == 1
     // EPOLL_CTL_MOD == 3
-    int op = loop->events[fd].mask == SE_NONE ? EPOLL_CTL_ADD : EPOLL_CTL_MOD;
+    int op = loop->events[fd].mask == AE_NONE ? EPOLL_CTL_ADD : EPOLL_CTL_MOD;
     ee.events = 0;
 
     mask |= loop->events[fd].mask; /* Merge old events */
-    if (mask & SE_READABLE) {
+    if (mask & AE_READABLE) {
         ee.events |= EPOLLIN;
     }
-    if (mask & SE_WRITABLE) {
+    if (mask & AE_WRITABLE) {
         ee.events |= EPOLLOUT;
     }
     ee.data.u64 = 0; /* avoid valgrind warning */
@@ -72,10 +72,10 @@ static int api_epoll_poll(EventLoop* loop, struct timeval* tvp) {
             int mask = 0;
             struct epoll_event *e = state->events + j;
 
-            if (e->events & EPOLLIN)  mask |= SE_READABLE;
-            if (e->events & EPOLLOUT) mask |= SE_WRITABLE;
-            if (e->events & EPOLLERR) mask |= SE_WRITABLE;
-            if (e->events & EPOLLHUP) mask |= SE_WRITABLE;
+            if (e->events & EPOLLIN)  mask |= AE_READABLE;
+            if (e->events & EPOLLOUT) mask |= AE_WRITABLE;
+            if (e->events & EPOLLERR) mask |= AE_WRITABLE;
+            if (e->events & EPOLLHUP) mask |= AE_WRITABLE;
 
             loop->fired[j].fd = e->data.fd;
             loop->fired[j].mask = mask;
@@ -92,14 +92,14 @@ static void api_epoll_del_event(EventLoop* loop, int fd, int delmask) {
 
     ee.events = 0;
     // 如果仍然可读，events添加读事件
-    if (mask & SE_READABLE) ee.events |= EPOLLIN;
+    if (mask & AE_READABLE) ee.events |= EPOLLIN;
     // 如果仍然可写，events添加写事件
-    if (mask & SE_WRITABLE) ee.events |= EPOLLOUT;
+    if (mask & AE_WRITABLE) ee.events |= EPOLLOUT;
 
     ee.data.u64 = 0;
     ee.data.fd = fd;
 
-    if (mask == SE_NONE) {
+    if (mask == AE_NONE) {
         /* Note, Kernel < 2.6.9 requires a non null event pointer even for
          * EPOLL_CTL_DEL. 
          */
@@ -158,10 +158,10 @@ EventLoop* event_loop_create(int set_size) {
     if (api_epoll_create(self) == -1) {
         goto error;
     }
-    /* Events with mask == SE_NONE are not set. So let's initialize the
+    /* Events with mask == AE_NONE are not set. So let's initialize the
      * vector with it. */
     for (int i = 0; i < set_size; i++) {
-        self->events[i].mask = SE_NONE;
+        self->events[i].mask = AE_NONE;
     }
     return self;
 
@@ -184,26 +184,26 @@ int event_loop_add_file_event(EventLoop* loop, int fd, int mask, FileFunc* func,
         void* user_data) {
     if (fd >= loop->set_size) {
         errno = ERANGE;
-        return SE_ERR;
+        return AE_ERR;
     }
 
     FileEvent* fevent = &loop->events[fd];
     if (api_epoll_add_event(loop, fd, mask) == -1) {
-        return SE_ERR;
+        return AE_ERR;
     }
 
     fevent->mask |= mask;
-    if (mask & SE_READABLE) {
+    if (mask & AE_READABLE) {
         fevent->read = func;
     }
-    if (mask & SE_WRITABLE) {
+    if (mask & AE_WRITABLE) {
         fevent->write = func;
     }
     fevent->user_data = user_data;
     if (fd > loop->max_fd) {
         loop->max_fd = fd;
     }
-    return SE_OK;
+    return AE_OK;
 }
 
 void event_loop_del_file_event(EventLoop* loop, int fd, int mask) {
@@ -212,16 +212,16 @@ void event_loop_del_file_event(EventLoop* loop, int fd, int mask) {
     }
 
     FileEvent* fe = &loop->events[fd];
-    if(fe->mask == SE_NONE) {
+    if(fe->mask == AE_NONE) {
         return;
     }
 
     api_epoll_del_event(loop, fd, mask);
     fe->mask = fe->mask & (~mask);
-    if (fd == loop->max_fd && fe->mask == SE_NONE) {
+    if (fd == loop->max_fd && fe->mask == AE_NONE) {
         /*Update the max fd*/
         for(int j = loop->max_fd - 1; j >= 0; j--) {
-            if (loop->events[j].mask != SE_NONE){
+            if (loop->events[j].mask != AE_NONE){
                 break;
             }
             loop->max_fd = j;
@@ -263,12 +263,12 @@ int event_loop_del_time_event(EventLoop* loop, int64_t id) {
                 te->finalize(loop, te->user_data);
             }
             free(te);
-            return SE_OK;
+            return AE_OK;
         }
         prev = te;
         te = te->next;
     }
-    return SE_ERR; /* NO event with the specified ID found */
+    return AE_ERR; /* NO event with the specified ID found */
 }
 
 static TimeEvent* search_nearest_timer(EventLoop* loop) {
@@ -340,7 +340,7 @@ static int process_time_events(EventLoop* loop){
              * to flag deleted elements in a special way for later
              * deletion (putting references to the nodes to delete into
              * another linked list). */
-            if (retval != SE_NOMORE) {
+            if (retval != AE_NOMORE) {
                 add_milliseconds_to_now(retval, &te->when_sec, &te->when_ms);
             } else {
                 event_loop_del_time_event(loop, id);
@@ -406,18 +406,18 @@ int event_loop_proccess_events(EventLoop* loop, int flags) {
             /* note the fe->mask & mask & ... code: maybe an already processed
              * event removed an element that fired and we still didn't
              * processed, so we check if the event is still valid. */
-            if (fe->mask & fired->mask & SE_READABLE) {
+            if (fe->mask & fired->mask & AE_READABLE) {
                 rfired = 1;
                 int ret = fe->read(loop, fired->fd, fe->user_data, fired->mask);
-                if (ret == SE_NOMORE) {
-                    event_loop_del_file_event(loop, fired->fd, SE_READABLE);    
+                if (ret == AE_NOMORE) {
+                    event_loop_del_file_event(loop, fired->fd, AE_READABLE);    
                 }
             }
-            if (fe->mask & fired->mask & SE_WRITABLE) {
+            if (fe->mask & fired->mask & AE_WRITABLE) {
                 if (!rfired || fe->write != fe->read) {
                     int ret = fe->write(loop, fired->fd, fe->user_data, fired->mask);
-                    if (ret == SE_NOMORE) {
-                       event_loop_del_file_event(loop, fired->fd, SE_WRITABLE);    
+                    if (ret == AE_NOMORE) {
+                       event_loop_del_file_event(loop, fired->fd, AE_WRITABLE);    
                     }
                 }
             }

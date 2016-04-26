@@ -48,7 +48,7 @@ int main() {
 
     SimpleAddress* a = simple_address_create_inet(NULL, 11233);
 
-    SimpleServer* s = simple_server_create(a, &handler, &conf);
+    SimpleServer* s = simple_server_create(a, &handler, &conf, NULL);
 
     simple_server_start(s);
 
@@ -74,7 +74,7 @@ int handle_new_conn(SimpleConnection* c) {
             simple_address_get_addr(l),
             simple_address_get_port(l),
             simple_connection_get_fd(c));
-    return SE_OK;
+    return AE_OK;
 }
 
 void* handle_decode(SimpleMessage* m) {
@@ -102,13 +102,13 @@ int handle_process(SimpleConnection* c) {
             (char*)simple_io_thread_get_name(t));
 
     simple_connection_send(c, simple_message_get(in));
-    return SE_OK;
+    return AE_OK;
 }
 
 int handle_encode(SimpleConnection* c, void* data) {
     SimpleMessage* out = simple_connection_get_out(c);
     simple_message_add(out, data, strlen(data) + 1);
-    return SE_OK;
+    return AE_OK;
 }
 
 
