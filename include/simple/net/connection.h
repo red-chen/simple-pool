@@ -33,4 +33,8 @@ SimpleAddress* simple_connection_get_server(SimpleConnection* self);
 
 TIME_IN_MICRO simple_connection_get_create_time(SimpleConnection* self);
 
+int64_t simple_connection_get_in_flow_bytes(SimpleConnection* self);
+
+int64_t simple_connection_get_out_flow_bytes(SimpleConnection* self);
+
 #endif

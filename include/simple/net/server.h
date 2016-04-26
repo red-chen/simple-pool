@@ -21,6 +21,7 @@
 
 //  Server 相关的配置
 typedef struct simple_server_config_t {
+    // IO线程数目
     int io_thread_count;
     // TODO 添加更多的选项，比如连接复用，超时等
 } SimpleServerConfig;

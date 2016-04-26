@@ -39,6 +39,9 @@ struct simple_connection_t {
 
     // 连接创建时间
     TIME_IN_MICRO create_in_micro;
+
+    int64_t in_flow_bytes;
+    int64_t out_flow_bytes;
 };
 
 static int simple_connection_read(
@@ -68,6 +71,8 @@ SimpleConnection* simple_connection_create(
     self->client = client;
     self->server = server;
     self->create_in_micro = simple_real_time_now();
+    self->in_flow_bytes = 0;
+    self->out_flow_bytes = 0;
     return self;
 }
 
@@ -149,6 +154,7 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     int n = read(fd, buffer, free);
     // TODO 检查N的值，并根据N来确定某些行为
     if (n > 0) {
+        self->in_flow_bytes += n;
         simple_message_set_push_size(self->in, n);
         // build request
         void* data = self->handler->decode(self->in);
@@ -187,6 +193,7 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
     int n = write(fd, data, size);
 
     if (n > 0) {
+        self->out_flow_bytes += n;
         if (n >= size) {
             simple_io_thread_add_file_event(
                 self->thread,
@@ -231,4 +238,12 @@ SimpleAddress* simple_connection_get_server(SimpleConnection* self) {
 
 TIME_IN_MICRO simple_connection_get_create_time(SimpleConnection* self) {
     return self->create_in_micro;
+}
+
+int64_t simple_connection_get_in_flow_bytes(SimpleConnection* self) {
+    return self->in_flow_bytes;
+}
+
+int64_t simple_connection_get_out_flow_bytes(SimpleConnection* self) {
+    return self->out_flow_bytes;
 }
