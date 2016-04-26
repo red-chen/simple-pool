@@ -56,7 +56,7 @@ void simple_acceptor_start(SimpleAcceptor* self) {
     simple_io_thread_add_file_event(
         self->thread,
         self->listen_fd,
-        AE_READABLE,
+        SE_READABLE,
         simple_acceptor_handle_read,
         self
     );
@@ -67,7 +67,7 @@ void simple_acceptor_stop(SimpleAcceptor* self) {
     simple_io_thread_del_file_event(
         self->thread,
         self->listen_fd,
-        AE_READABLE
+        SE_READABLE
     );
 }
 
@@ -143,5 +143,5 @@ int simple_acceptor_handle_read(EventLoop* loop, int sock, void* user_data, int 
     }
 
     self->new_conn(self->user_data, conn_fd, client, server);
-    return AE_OK;
+    return SE_OK;
 }

@@ -40,12 +40,12 @@ int handle_write(EventLoop* loop, int fd, void* user_data, int mask) {
     if (count++ < limit) {
         printf("fd:%d, sock:%d\n", fd, u->sock);
         write(fd, buffer, strlen(buffer) + 1);
-        event_loop_add_file_event(loop, fd, AE_READABLE, handle_read, buffer);    
+        event_loop_add_file_event(loop, fd, SE_READABLE, handle_read, buffer);    
     } else {
         close(fd);
         count++;
     }
-    return AE_NOMORE;
+    return SE_NOMORE;
 }
 
 // Implement file func
@@ -53,8 +53,8 @@ int handle_read(EventLoop* loop, int fd, void* user_data, int mask) {
     bzero(buffer, 1024);
     read(fd, buffer, 1024);
     printf("%s\n", buffer);
-    event_loop_add_file_event(loop, fd, AE_WRITABLE, handle_write, buffer);    
-    return AE_NOMORE;
+    event_loop_add_file_event(loop, fd, SE_WRITABLE, handle_write, buffer);    
+    return SE_NOMORE;
 }
 
 int client_connect() {
@@ -89,7 +89,7 @@ int main() {
         simple_io_thread_add_file_event(
                 t, 
                 fd, 
-                AE_WRITABLE, 
+                SE_WRITABLE, 
                 handle_write, 
                 u);
     }

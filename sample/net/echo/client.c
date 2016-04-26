@@ -98,20 +98,20 @@ int handle_new_conn(SimpleConnection* c) {
             simple_address_get_port(r),
             simple_connection_get_fd(c));
 
-    return AE_OK;
+    return SE_OK;
 }
 
 int handle_new_packet(SimpleConnection* c) {
     SimpleIOThread* t = simple_connection_get_thread(c);
     ASSERT_NOT_NULL(t);
     if (count > limit) {
-        return AE_OK;   
+        return SE_OK;   
     }
 
     ATOMIC_INC(&count);
 
     simple_connection_send(c, "hello world");
-    return AE_OK;
+    return SE_OK;
 }
 
 void* handle_decode(SimpleMessage* m) {
@@ -123,7 +123,7 @@ int handle_encode(SimpleConnection* c, void* data) {
     ASSERT_NOT_NULL(t);
     SimpleMessage* out = simple_connection_get_out(c);
     simple_message_add(out, data, strlen(data) + 1);
-    return AE_OK;
+    return SE_OK;
 }
 
 int handle_process(SimpleConnection* c) {
@@ -138,5 +138,5 @@ int handle_process(SimpleConnection* c) {
     ATOMIC_INC(&result);
 
     simple_connection_close(c);
-    return AE_OK;
+    return SE_OK;
 }

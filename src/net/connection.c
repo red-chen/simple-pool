@@ -87,7 +87,7 @@ void simple_connection_establish(SimpleConnection* self) {
     simple_io_thread_add_file_event(
         self->thread,
         self->sock,
-        AE_READABLE,
+        SE_READABLE,
         simple_connection_read,
         self
     );
@@ -95,7 +95,7 @@ void simple_connection_establish(SimpleConnection* self) {
     simple_io_thread_add_file_event(
         self->thread,
         self->sock,
-        AE_WRITABLE,
+        SE_WRITABLE,
         simple_connection_write,
         self
     );
@@ -110,12 +110,12 @@ int simple_connection_send(SimpleConnection* self, void* data) {
     simple_io_thread_add_file_event(
         self->thread,
         self->sock,
-        AE_WRITABLE,
+        SE_WRITABLE,
         simple_connection_write,
         self
     );
 
-    return AE_OK;
+    return SE_OK;
 }
 
 // ---------------------------------------------------
@@ -136,7 +136,7 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
 
     int free = simple_message_get_free_size(self->in);
     if (free <= 0) {
-        return AE_AGAIN;
+        return SE_AGAIN;
     }
 
     void* buffer = simple_message_get_push_ptr(self->in, free);
@@ -147,13 +147,13 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
         // build request
         void* data = self->handler->decode(self->in);
         if (data == NULL) {
-            return AE_AGAIN;
+            return SE_AGAIN;
         }
         self->handler->process(self);
     } else {
         simple_connection_close(self);
     }
-    return AE_NOMORE;
+    return SE_NOMORE;
 }
 
 int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) {
@@ -169,7 +169,7 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
 
     // TODO 考虑是否需要检查size ?
     if (size <= 0 ) {
-        return AE_NOMORE;
+        return SE_NOMORE;
     }
 
     // NOTE 读取发送队列中的数据，将数据发送出去，同理，也只调用一次write
@@ -185,18 +185,18 @@ int simple_connection_write(EventLoop* loop, int fd, void* user_data, int mask) 
             simple_io_thread_add_file_event(
                 self->thread,
                 self->sock,
-                AE_READABLE,
+                SE_READABLE,
                 simple_connection_read,
                 self
             );
         } else {
             simple_message_set_pull_size(self->out, n);
-            return AE_AGAIN;
+            return SE_AGAIN;
         }
     } else {
         simple_connection_close(self);
     }
-    return AE_NOMORE;
+    return SE_NOMORE;
 }
 
 SimpleIOThread* simple_connection_get_thread(SimpleConnection* self) {

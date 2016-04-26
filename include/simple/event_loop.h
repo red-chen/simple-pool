@@ -36,20 +36,20 @@
 #include <time.h>
 #include <stdint.h>
 
-#define AE_OK           0
-#define AE_ERR         -1
+#define SE_OK           0
+#define SE_ERR         -1
 
-#define AE_NOMORE      -2  // 表示不再执行
-#define AE_AGAIN       -3  // 表示继续执行
+#define SE_NOMORE      -2  // 表示不再执行
+#define SE_AGAIN       -3  // 表示继续执行
 
-#define AE_NONE         0
-#define AE_READABLE     1
-#define AE_WRITABLE     2
+#define SE_NONE         0
+#define SE_READABLE     1
+#define SE_WRITABLE     2
 
-#define AE_FILE_EVENTS  1
-#define AE_TIME_EVENTS  2
-#define AE_ALL_EVENTS   (AE_FILE_EVENTS|AE_TIME_EVENTS)
-#define AE_DONT_WAIT    4
+#define SE_FILE_EVENTS  1
+#define SE_TIME_EVENTS  2
+#define SE_ALL_EVENTS   (SE_FILE_EVENTS|SE_TIME_EVENTS)
+#define SE_DONT_WAIT    4
 
 typedef struct event_loop_t EventLoop;
 
@@ -59,12 +59,12 @@ typedef struct event_loop_t EventLoop;
  *     loop 事件循环
  *     fd 需要监听的fd
  *     user_data 用户传入的参数，详见event_loop_add_file_event的user_data字段
- *     mask 监听的事件，AE_READABLE，AE_WRITABLE
+ *     mask 监听的事件，SE_READABLE，SE_WRITABLE
  *
  * 返回值
- *    AE_NOMORE 表示不再监听当前事件
- *    AE_AGAIN  表示需要继续监控
- *    AE_ERR    表示底层发生了错误
+ *    SE_NOMORE 表示不再监听当前事件
+ *    SE_AGAIN  表示需要继续监控
+ *    SE_ERR    表示底层发生了错误
  */
 typedef int FileFunc (EventLoop* loop, int fd, void* user_data, int mask);
 
@@ -77,7 +77,7 @@ typedef int FileFunc (EventLoop* loop, int fd, void* user_data, int mask);
  *
  * 返回值
  *     TimeFunc下一次执行的时间间隔
- *     AE_NOMORE表示不再执行，如果不再执行，loop会删除该时间事件，不用显示删除
+ *     SE_NOMORE表示不再执行，如果不再执行，loop会删除该时间事件，不用显示删除
  */
 typedef int64_t TimeFunc (EventLoop* loop, int64_t id, void* user_data);
 
@@ -165,13 +165,13 @@ void event_loop_set_after(EventLoop* loop, AfterFunc* after);
  * 参数
  *     loop 事件循环
  *     fd 需要监听的fd
- *     mask 监听的具体事件AE_READABLE，AE_WRITABLE
+ *     mask 监听的具体事件SE_READABLE，SE_WRITABLE
  *     func 事件发生后的回调函数
  *     user_data 用户注入的自定义的参数
  *
  * 返回值
- *     AE_OK 表示成功
- *     AE_ERR 表示失败
+ *     SE_OK 表示成功
+ *     SE_ERR 表示失败
  */
 int event_loop_add_file_event(
         EventLoop* loop,

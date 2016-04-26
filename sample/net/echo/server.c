@@ -74,7 +74,7 @@ int handle_new_conn(SimpleConnection* c) {
             simple_address_get_addr(l),
             simple_address_get_port(l),
             simple_connection_get_fd(c));
-    return AE_OK;
+    return SE_OK;
 }
 
 void* handle_decode(SimpleMessage* m) {
@@ -102,13 +102,13 @@ int handle_process(SimpleConnection* c) {
             (char*)simple_io_thread_get_name(t));
 
     simple_connection_send(c, simple_message_get(in));
-    return AE_OK;
+    return SE_OK;
 }
 
 int handle_encode(SimpleConnection* c, void* data) {
     SimpleMessage* out = simple_connection_get_out(c);
     simple_message_add(out, data, strlen(data) + 1);
-    return AE_OK;
+    return SE_OK;
 }
 
 
