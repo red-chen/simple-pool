@@ -4,3 +4,4 @@
 Import('env')
 
 env.aSubs('echo')
+env.aSubs('fastcgi')
