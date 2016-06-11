@@ -3,11 +3,9 @@
 
 Import('env')
 
-# 添加依赖的库的头文件
-env.Append(CPPPATH='#/include/simple/')
+env = env.Clone()
 
-# 添加依赖的库的路径
-env.Append(LIBPATH='#/lib/')
+env.Append(LIBPATH=['#/lib/'])
 
 lib = [
     'simple_static'

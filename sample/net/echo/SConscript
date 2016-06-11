@@ -3,9 +3,7 @@
 
 Import('env')
 
-env.Append(CPPPATH=['#/include/'])
-
-env.Append(LIBPATH=['#/lib/'])
+env = env.Clone()
 
 env.aProgram('net_server', ['server.c'], LIBS=['simple_static', 'pthread'])
 env.aProgram('net_client', ['client.c'], LIBS=['simple_static', 'pthread'])

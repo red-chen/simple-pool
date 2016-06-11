@@ -25,11 +25,11 @@ void* simple_pool_malloc(SimplePool* self, size_t size);
 // 将申请的内存释放
 void simple_pool_free(SimplePool* self, void* ptr);
 
-// 清空内存池中的数据
-void simple_pool_clear(SimplePool* self);
+// 清空large内存并重置相应的指针
+void simple_pool_reset(SimplePool* self);
 
 // 销毁内存池对象
-void simple_pool_destroy(SimplePool* self);
+void simple_pool_destory(SimplePool* self);
 
 // 显示内存池的状态，用于调试
 void simple_pool_status(SimplePool* self);

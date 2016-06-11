@@ -3,6 +3,10 @@
 
 Import('env')
 
+env = env.Clone()
+
+env.Append(LIBPATH=['#/lib/'])
+
 obj = [
     'cJSON.c'
 ]

@@ -3,8 +3,6 @@
 
 Import('env')
 
-env.Append(CPPPATH=['#/include/'])
-
-env.Append(LIBPATH=['#/lib/'])
+env = env.Clone()
 
 env.aProgram('io_time_event_test', ['time_event_test.c'], LIBS=['simple_static', 'pthread'])

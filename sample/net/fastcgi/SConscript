@@ -3,9 +3,7 @@
 
 Import('env')
 
-env.Append(CPPPATH=['#/include/'])
-
-env.Append(LIBPATH=['#/lib/'])
+env = env.Clone()
 
 env.aProgram('fcgi_main', ['main.c', 'fcgi_handler.c'], LIBS=['simple_static', 'pthread'])
 env.aProgram('fcgi_server', ['server.c', 'fcgi_handler.c'], LIBS=['simple_static', 'pthread'])

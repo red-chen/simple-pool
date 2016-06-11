@@ -8,12 +8,13 @@
 
 size_t simple_pool_pagesize = 0;
 
-#define SIMPLE_MAX_ALLOC_FROM_POOL (simple_pool_pagesize == 0 ? (simple_pool_pagesize = getpagesize() - 1) : (simple_pool_pagesize))
+#define SIMPLE_MAX_ALLOC_FROM_POOL \
+    (simple_pool_pagesize == 0 ? (simple_pool_pagesize = getpagesize() - 1) : (simple_pool_pagesize))
 
-typedef struct SimplePoolLarge SimplePoolLarge;
+typedef struct SimplePoolLargeSegment SimplePoolLargeSegment;
 
-struct SimplePoolLarge {
-    SimplePoolLarge* next;
+struct SimplePoolLargeSegment {
+    SimplePoolLargeSegment* next;
     void* alloc;
 };
 
@@ -28,7 +29,7 @@ struct SimplePool {
     SimplePoolHeader header;
     size_t max;
     SimplePool* current;
-    SimplePoolLarge* large;
+    SimplePoolLargeSegment* large;
 };
 
 static void* simple_pool_memalign(int alignment, int size) {
@@ -56,7 +57,7 @@ SimplePool* simple_pool_create(size_t size) {
 }
 
 void simple_pool_destory(SimplePool* self) {
-    SimplePoolLarge* large = NULL;
+    SimplePoolLargeSegment* large = NULL;
     for (large = self->large; large; large = large->next) {
         if (large->alloc) {
             free(large->alloc);
@@ -110,7 +111,7 @@ static void* simple_pool_alloc_block(SimplePool* self, size_t size) {
 static void* simple_pool_alloc_large(SimplePool *self, size_t size) {
     void              *p;
     int              n;
-    SimplePoolLarge  *large;
+    SimplePoolLargeSegment  *large;
 
     p = malloc(size);
     if (p == NULL) {
@@ -130,7 +131,7 @@ static void* simple_pool_alloc_large(SimplePool *self, size_t size) {
         }
     }
 
-    large = simple_pool_malloc(self, sizeof(SimplePoolLarge));
+    large = simple_pool_malloc(self, sizeof(SimplePoolLargeSegment));
     if (large == NULL) {
         free(p);
         return NULL;
@@ -142,7 +143,6 @@ static void* simple_pool_alloc_large(SimplePool *self, size_t size) {
 
     return p;
 }
-
 
 void* simple_pool_malloc(SimplePool* self, size_t size) {
     if (size < self->max) {
@@ -164,7 +164,7 @@ void* simple_pool_malloc(SimplePool* self, size_t size) {
 
 void simple_pool_reset(SimplePool* self) {
     SimplePool        *p;
-    SimplePoolLarge   *l;
+    SimplePoolLargeSegment   *l;
 
     for (l = self->large; l; l = l->next) {
         if (l->alloc) {
