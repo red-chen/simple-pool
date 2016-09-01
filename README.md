@@ -1,17 +1,18 @@
 # 功能
 # 开发环境
 * gcc version 4.8.3 20140911 (Red Hat 4.8.3-9) (GCC)
+* C99
+* python
 
-# 部署
-# TODO
-* simple
-  * 使用timing wheel实现空闲链接剔除
-  * 添加内存池
-* common
-  * 添加hash函数库
-  * 添加atomic函数库
-
-
+# 本地编译
+```
+> git clone https://github.com/red-chen/simple.git --recursive
+> cd simple
+> cd deps/lemon
+> scons
+> cd -
+> scons
+```
 
 ###
 
