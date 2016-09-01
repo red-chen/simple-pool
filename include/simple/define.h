@@ -7,12 +7,12 @@
 // 基础对象声明
 // ----------------------------------------------
 
-typedef struct simple_client_t SimpleClient;
-typedef struct simple_address_t SimpleAddress;
-typedef struct simple_server_t SimpleServer;
-typedef struct simple_acceptor_t SimpleAcceptor;
-typedef struct simple_connection_t SimpleConnection;
-typedef struct simple_message_t SimpleMessage;
+typedef struct SimpleClient SimpleClient;
+typedef struct SimpleAddress SimpleAddress;
+typedef struct SimpleServer SimpleServer;
+typedef struct SimpleAcceptor SimpleAcceptor;
+typedef struct SimpleConnection SimpleConnection;
+typedef struct SimpleMessage SimpleMessage;
 
 // ----------------------------------------------
 // 用户事件回调方法
@@ -72,7 +72,7 @@ typedef void* SimpleDecode(SimpleMessage* m);
  */
 typedef int SimpleProcess(SimpleConnection* s);
 
-typedef struct simple_handler_t {
+typedef struct SimpleHandler {
     SimpleNewConn* new_conn; // 可选
     SimpleDisConn* dis_conn; // 可选
     SimpleIdleConn* idle_conn; // 可选

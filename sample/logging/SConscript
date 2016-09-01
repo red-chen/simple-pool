@@ -1,8 +1,0 @@
-# -*- mode: python -*-
-# -*- coding: utf-8 -*-
-
-Import('env')
-
-env = env.Clone()
-
-env.aProgram('logging_test', ['logging_test.c'], LIBS=['simple_static', 'pthread'])

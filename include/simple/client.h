@@ -3,7 +3,7 @@
 
 #include "define.h"
 
-typedef struct simple_client_config_t {
+typedef struct SimpleClientConfig {
     int io_thread_count;
     /// 是否开启连接复用，1表示打开，0表示关闭
     //int conn_reuse;
