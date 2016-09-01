@@ -1,8 +1,8 @@
-#include <simple/net/define.h>
-#include <simple/net/address.h>
-#include <simple/net/message.h>
-#include <simple/net/server.h>
-#include <simple/net/connection.h>
+#include <simple/define.h>
+#include <simple/address.h>
+#include <simple/message.h>
+#include <simple/server.h>
+#include <simple/connection.h>
 
 #include <fcntl.h>
 #include <errno.h>

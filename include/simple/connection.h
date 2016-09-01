@@ -3,8 +3,8 @@
 
 #include "define.h"
 
-#include "io_thread.h"
-#include "timestamp.h"
+#include "lemon/io_thread.h"
+#include "lemon/timestamp.h"
 
 SimpleConnection* simple_connection_create(
         SimpleIOThread* thread, 

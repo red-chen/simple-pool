@@ -1,5 +1,6 @@
-#include "net/message.h"
-#include "unittest.h"
+#include "message.h"
+
+#include "lemon/unittest.h"
 
 #include <stdio.h>
 #include <stdbool.h>

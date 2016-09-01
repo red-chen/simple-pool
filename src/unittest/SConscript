@@ -6,9 +6,11 @@ Import('env')
 env = env.Clone()
 
 env.Append(LIBPATH=['#/lib/'])
+env.Append(LIBPATH=['#/deps/lemon/lib/'])
 
 lib = [
-    'simple_static'
+    'simple_static',
+    'lemon_static',
 ]
 
 env.aProgram(

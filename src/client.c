@@ -1,9 +1,9 @@
-#include "net/client.h"
+#include "client.h"
 
-#include "net/address.h"
-#include "net/connection.h"
+#include "address.h"
+#include "connection.h"
 
-#include "assert.h"
+#include "lemon/assert.h"
 
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <signal.h>
 
-struct simple_client_t {
+struct SimpleClient {
     int index;
     SimpleAddress* addr;
     SimpleHandler* handler;

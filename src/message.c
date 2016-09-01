@@ -1,6 +1,6 @@
-#include "net/message.h"
+#include "message.h"
 
-#include "assert.h"
+#include "lemon/assert.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 
 #define MESSAGE_MEM_SIZE 65536  // 64K
 
-struct simple_message_t {
+struct SimpleMessage {
     int capacity;
     int size;
     void* push_index;

@@ -1,10 +1,10 @@
-#include "net/connection.h"
-#include "net/message.h"
+#include "connection.h"
+#include "message.h"
 
-#include "io_thread.h"
-#include "event_loop.h"
-#include "assert.h"
-#include "timestamp.h"
+#include "lemon/io_thread.h"
+#include "lemon/event_loop.h"
+#include "lemon/assert.h"
+#include "lemon/timestamp.h"
 
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 
-struct simple_connection_t {
+struct SimpleConnection {
     int sock;
     SimpleIOThread* thread; 
     SimpleHandler* handler; 

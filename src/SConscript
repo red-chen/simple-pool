@@ -4,7 +4,9 @@
 Import('env')
 
 env.Append(CPPPATH='#/include/simple/')
+env.Append(CPPPATH='#/deps/lemon/include/')
 
+obj = []
 obj += Glob('*.c')
 
 env.aStaticLibrary("simple_static", obj) 

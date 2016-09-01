@@ -10,14 +10,14 @@
  * 异步框架调用Task的“状态”函数，通知响应已经完成或者调用回调函数。
  */
 
-#include <simple/net/define.h>
-#include <simple/net/message.h>
-#include <simple/net/client.h>
-#include <simple/net/connection.h>
-#include <simple/net/address.h>
+#include <simple/define.h>
+#include <simple/message.h>
+#include <simple/client.h>
+#include <simple/connection.h>
+#include <simple/address.h>
 
-#include <simple/atomic.h>
-#include <simple/assert.h>
+#include <lemon/atomic.h>
+#include <lemon/assert.h>
 
 #include <fcntl.h>
 #include <errno.h>

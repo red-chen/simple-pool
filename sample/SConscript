@@ -5,8 +5,13 @@ Import('env')
 
 env = env.Clone()
 
+# simple
 env.Append(CPPPATH=['#/include/'])
 env.Append(LIBPATH=['#/lib/'])
+
+# lemon
+env.Append(CPPPATH=['#/deps/lemon/include/'])
+env.Append(LIBPATH=['#/deps/lemon/lib/'])
 
 env.aSubs('echo')
 env.aSubs('http')

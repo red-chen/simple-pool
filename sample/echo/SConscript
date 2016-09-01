@@ -5,5 +5,5 @@ Import('env')
 
 env = env.Clone()
 
-env.aProgram('net_server', ['server.c'], LIBS=['simple_static', 'pthread'])
-env.aProgram('net_client', ['client.c'], LIBS=['simple_static', 'pthread'])
+env.aProgram('net_server', ['server.c'], LIBS=['simple_static', 'lemon_static', 'pthread'])
+env.aProgram('net_client', ['client.c'], LIBS=['simple_static', 'lemon_static', 'pthread'])

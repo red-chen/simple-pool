@@ -1,10 +1,10 @@
-#include "net/address.h"
+#include "address.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-struct simple_address_t {
+struct SimpleAddress {
     int family; // AF_INET, AF_INET6, AF_UNIX
     char addr[32];
     union {

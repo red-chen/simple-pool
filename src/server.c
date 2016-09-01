@@ -1,14 +1,14 @@
-#include "net/server.h"
+#include "server.h"
 
-#include "net/address.h"
-#include "net/acceptor.h"
-#include "net/connection.h"
+#include "address.h"
+#include "acceptor.h"
+#include "connection.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-struct simple_server_t {
+struct SimpleServer {
     SimpleAddress* addr;
     int index;
     SimpleHandler* handler;

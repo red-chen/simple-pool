@@ -1,8 +1,8 @@
-#include "net/acceptor.h"
-#include "net/address.h"
+#include "acceptor.h"
+#include "address.h"
 
-#include "io_thread.h"
-#include "assert.h"
+#include "lemon/io_thread.h"
+#include "lemon/assert.h"
 
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -18,7 +18,7 @@
 
 #define MAX_LISTENFD 1024
 
-struct simple_acceptor_t {
+struct SimpleAcceptor {
     SimpleAddress* addr;
     int listen_fd;
     SimpleNewConnection* new_conn;
