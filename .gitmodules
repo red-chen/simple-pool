@@ -1,0 +1,3 @@
+[submodule "lemon"]
+    path = deps/lemon
+    url = https://github.com/red-chen/lemon.git
