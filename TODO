@@ -1,5 +1,19 @@
-# 当前正在弄io.h
+## version 0.9
+## version 0.8
+## version 0.7
+## version 0.6
+## version 0.5
+## version 0.4
+## version 0.3
+- 添加Counter
+- 添加Time Trace
 
-1.add more sample for eventloop
-2.add counter 
-3.add time trace
+
+## version 0.2
+- 提供完成的测试用例
+- 添加更多的例子，包括fastcgi等
+
+## version 0.1
+- 搭建完整的构建和测试流程
+- 提供少量的例子
+
