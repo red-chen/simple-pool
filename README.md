@@ -13,6 +13,8 @@ https://github.com/red-chen/simple_scons
 # 编译代码
 > git clone https://github.com/red-chen/simple.git --recursive
 > cd simple
+# option
+> git submodule update --recursive
 > cd deps/lemon
 > scons
 > cd -
