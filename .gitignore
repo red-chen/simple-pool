@@ -38,3 +38,6 @@
 *.so
 *.os
 *_unittest
+
+# Other
+.scons*

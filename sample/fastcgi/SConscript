@@ -5,5 +5,11 @@ Import('env')
 
 env = env.Clone()
 
-env.aProgram('fcgi_main', ['main.c', 'fcgi_handler.c'], LIBS=['simple_static', 'lemon_static', 'pthread'])
-env.aProgram('fcgi_server', ['server.c', 'fcgi_handler.c'], LIBS=['simple_static', 'lemon_static', 'pthread'])
+obj = []
+obj += Glob('fcgi_handler.c')
+
+env.aStaticLibrary("fcgi_handler_static", obj)
+env.aSharedLibrary("fcgi_handler_shared", obj)
+
+env.aProgram('fcgi_main', ['main.c'], LIBS=['fcgi_handler_shared', 'simple_static', 'lemon_static', 'pthread'])
+env.aProgram('fcgi_server', ['server.c'], LIBS=['fcgi_handler_shared', 'simple_static', 'lemon_static', 'pthread'])
