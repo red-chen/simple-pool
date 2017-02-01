@@ -1,4 +1,9 @@
-# 功能
+# Simple-Poll
+基于Event Loop实现的基础网络框架，可以很容易基于此框架实现各种高性能的网络服务器
+
+[![Software License](https://img.shields.io/badge/license-apache2-brightgreen.svg)](LICENSE)
+[![Build Status](https://api.travis-ci.org/red-chen/simple-pool.svg)](https://travis-ci.org/red-chen/simple-pool)
+
 # 开发环境
 * gcc version 4.8.3 20140911 (Red Hat 4.8.3-9) (GCC)
 * C99
