@@ -1,6 +1,6 @@
 #include "message.h"
 
-#include "lemon/assert.h"
+#include "simple/assert.h"
 
 #include <stdio.h>
 #include <stdlib.h>

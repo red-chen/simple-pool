@@ -16,8 +16,8 @@
 #include <simple-pool/connection.h>
 #include <simple-pool/address.h>
 
-#include <lemon/atomic.h>
-#include <lemon/assert.h>
+#include <simple/atomic.h>
+#include <simple/assert.h>
 
 #include <fcntl.h>
 #include <errno.h>

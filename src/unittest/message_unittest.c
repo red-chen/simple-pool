@@ -1,6 +1,6 @@
 #include "message.h"
 
-#include "lemon/unittest.h"
+#include "simple/unittest.h"
 
 #include <stdio.h>
 #include <stdbool.h>

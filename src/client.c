@@ -3,7 +3,7 @@
 #include "address.h"
 #include "connection.h"
 
-#include "lemon/assert.h"
+#include "simple/assert.h"
 
 #include <sys/epoll.h>
 #include <sys/socket.h>

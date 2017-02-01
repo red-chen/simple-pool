@@ -3,7 +3,7 @@
 
 #include "define.h"
 
-#include "lemon/io_thread.h"
+#include "simple/io_thread.h"
 
 SimpleAcceptor* simple_acceptor_create(
         SimpleAddress* addr, 
