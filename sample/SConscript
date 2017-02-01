@@ -5,13 +5,13 @@ Import('env')
 
 env = env.Clone()
 
-# simple
+# simple-pool
 env.Append(CPPPATH=['#/include/'])
 env.Append(LIBPATH=['#/lib/'])
 
-# lemon
-env.Append(CPPPATH=['#/deps/lemon/include/'])
-env.Append(LIBPATH=['#/deps/lemon/lib/'])
+# simple
+env.Append(CPPPATH=['#/deps/simple/include/'])
+env.Append(LIBPATH=['#/deps/simple/lib/'])
 
 env.aSubs('echo')
 env.aSubs('fastcgi')

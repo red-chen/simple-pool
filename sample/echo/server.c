@@ -1,8 +1,8 @@
-#include <simple/define.h>
-#include <simple/address.h>
-#include <simple/message.h>
-#include <simple/server.h>
-#include <simple/connection.h>
+#include <simple-pool/define.h>
+#include <simple-pool/address.h>
+#include <simple-pool/message.h>
+#include <simple-pool/server.h>
+#include <simple-pool/connection.h>
 
 #include <fcntl.h>
 #include <errno.h>

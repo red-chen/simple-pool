@@ -10,11 +10,11 @@
  * 异步框架调用Task的“状态”函数，通知响应已经完成或者调用回调函数。
  */
 
-#include <simple/define.h>
-#include <simple/message.h>
-#include <simple/client.h>
-#include <simple/connection.h>
-#include <simple/address.h>
+#include <simple-pool/define.h>
+#include <simple-pool/message.h>
+#include <simple-pool/client.h>
+#include <simple-pool/connection.h>
+#include <simple-pool/address.h>
 
 #include <lemon/atomic.h>
 #include <lemon/assert.h>
