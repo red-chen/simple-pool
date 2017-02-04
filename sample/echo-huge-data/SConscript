@@ -1,0 +1,9 @@
+# -*- mode: python -*-
+# -*- coding: utf-8 -*-
+
+Import('env')
+
+env = env.Clone()
+
+env.aProgram('echo_huge_data_server', ['server.c'], LIBS=['simple_pool_static', 'simple_static', 'pthread'])
+env.aProgram('echo_huge_data_client', ['client.c'], LIBS=['simple_pool_static', 'simple_static', 'pthread'])
