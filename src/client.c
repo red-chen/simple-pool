@@ -54,6 +54,7 @@ void simple_client_destroy(SimpleClient* self) {
     free(self);
 }
 
+// 创建一个连接，并为连接绑定读写事件
 int simple_client_connect(SimpleClient* self) {
     int conn_fd = 0;
     SimpleAddress* client = NULL;
@@ -101,6 +102,7 @@ int simple_client_connect(SimpleClient* self) {
             client,
             server);
 
+    // 绑定读写
     simple_connection_establish(conn);
 
     if (++(self->index) >= self->config.io_thread_count ) {

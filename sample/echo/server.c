@@ -89,6 +89,7 @@ void* handle_decode(SimpleMessage* m) {
     // 针对于这种情况，建议用户自己在decode函数中判断一个包是否完成，如果包
     // 已经构建好，那么可以将这个包发送到一个队里中，或者一旦接到一部分数据
     // 将这部分数据写入一个流中，下游线程从队列或者流中获取数据处理。
+   
     return simple_message_get_pull_ptr(m);
 }
 

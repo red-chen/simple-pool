@@ -56,6 +56,10 @@ typedef int SimpleEncode(SimpleConnection* r, void* data);
  * 比如一个完整的Http请求等
  *
  * 调用位置：connection的read事件函数中
+ *
+ * 函数将接收的数据返回给上层调用，如果接收的数据未完整，函数应
+ * 该返回NULL，当上层函数检查有数据返回，会调用SimpleProcess，如
+ * 果返回NULL，程序会进入AE_AGAIN状态。
  */
 
 typedef void* SimpleDecode(SimpleMessage* m);

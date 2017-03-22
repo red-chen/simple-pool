@@ -89,6 +89,7 @@ void simple_connection_close(SimpleConnection* self) {
     free(self);
 }
 
+// 将连接绑定读写事件，放入事件池中
 void simple_connection_establish(SimpleConnection* self) {
     if (self->handler->new_conn != NULL) {
         self->handler->new_conn(self);
@@ -134,7 +135,7 @@ int simple_connection_read(EventLoop* loop, int fd, void* user_data, int mask) {
     SimpleConnection* self = (SimpleConnection*) user_data;
     // NOTE 怎么知道要读多少数据呢？
     // 比如一个结构，因为用户才知道要读多少数据，所以这里应该嵌入用户的逻辑
-    // 代码，所以这里应该调用handler的decode方法。
+    // 代码，因此这里应该调用handler的decode方法。
     
     // NOTE 这里使用一个Buffer来接收数据，Buffer每次调用一下read，然后将收到的数据
     // 传送给handler中decode函数, decode在函数在根据收到数据的大小决定放回
